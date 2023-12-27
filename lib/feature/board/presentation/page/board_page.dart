@@ -1,0 +1,13 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+
+@RoutePage()
+class BoardPage extends StatelessWidget {
+  static const path = 'board';
+  const BoardPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}

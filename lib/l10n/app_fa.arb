@@ -1,0 +1,9 @@
+{
+    "general_error": "خطا در انجام عملیات",
+    "internet_error": "عدم دسترسی به اینترنت",
+    "app_name": "حکم",
+    "menu_item_quick_game": "شروع بازی",
+    "menu_item_settings": "تنظیمات",
+    "menu_item_exit": "خروج",
+    "menu_title": "بــــازی حــــکم"
+}
