@@ -47,7 +47,8 @@ extension MCardListExt on List<MCard> {
 
 extension MenuItemExt on MenuItem {
   String toStringValue(BuildContext context) => switch (this) {
-        MenuItem.quickGame => Strings.of(context).menu_item_quick_game,
+        MenuItem.createServer => Strings.of(context).menu_item_create_server,
+        MenuItem.connectToServer => Strings.of(context).menu_item_connect_to_server,
         MenuItem.settings => Strings.of(context).menu_item_settings,
         MenuItem.exit => Strings.of(context).menu_item_exit,
       };

@@ -1,8 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:card_game/feature/menu/presentation/page/menu_page.dart';
 import 'package:flutter/material.dart';
 
 import '../board/presentation/page/board_page.dart';
+import '../menu/presentation/page/lobby_page.dart';
+import '../menu/presentation/page/menu_page.dart';
 import 'app_router.gr.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page|Screen|Widget,Route')
@@ -13,6 +14,12 @@ class AppRouter extends $AppRouter {
         AutoRoute(
           path: '/${MenuPage.path}',
           page: MenuRoute.page,
+          maintainState: false,
+          keepHistory: false,
+        ),
+        AutoRoute(
+          path: '/${LobbyPage.path}',
+          page: LobbyRoute.page,
           maintainState: false,
           keepHistory: false,
         ),

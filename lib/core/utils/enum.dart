@@ -23,7 +23,8 @@ enum CardName {
 
 
 enum MenuItem {
-  quickGame,
+  createServer,
+  connectToServer,
   settings,
   exit,
 }

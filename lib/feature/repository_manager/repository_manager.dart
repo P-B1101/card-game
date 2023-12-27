@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../core/error/exceptions.dart';
@@ -32,29 +32,29 @@ class RepositoryHelperImpl implements RepositoryHelper {
     try {
       return Right(await tryToLoad());
     } on ServerException catch (error) {
-      log(error.toString());
+      debugPrint(error.toString());
       return Left(ServerFailure(message: error.message));
     } on UnAuthorizeException {
       await databaseDataSource.removeAllData();
-      log('UnAuthorizeException');
+      debugPrint('UnAuthorizeException');
       return Left(AuthenticationFailure());
     } on AccessDeniedException {
-      log('AccessDeniedException');
+      debugPrint('AccessDeniedException');
       return Left(AccessDeniedFailure());
     } on MultiDeviceException {
-      log('MultiDeviceException');
+      debugPrint('MultiDeviceException');
       return Left(MultiDeviceFailure());
     } on CancelSelectFileException {
-      log('CancelSelectFileException');
+      debugPrint('CancelSelectFileException');
       return Left(CancelSelectFileFailure());
     } on FileExtensionException catch (error) {
-      log(error.toString());
+      debugPrint(error.toString());
       return Left(FileExtensionFailure(error.extensions));
     } on SocketException catch (error) {
-      log(error.toString());
+      debugPrint(error.toString());
       return const Left(ServerFailure());
     } on Exception catch (error) {
-      log(error.toString());
+      debugPrint(error.toString());
       return const Left(ServerFailure());
     }
   }

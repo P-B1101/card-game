@@ -2,6 +2,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io/socket_io.dart';
 
 import 'injectable_container.config.dart';
 
@@ -31,4 +32,8 @@ abstract class RegisterFToast {
   FToast get tosat => FToast();
 }
 
-
+@module
+abstract class RegisterServer {
+  @lazySingleton
+  Server get server => Server(server: '2000');
+}

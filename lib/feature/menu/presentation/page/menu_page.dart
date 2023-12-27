@@ -4,6 +4,7 @@ import 'package:card_game/core/utils/extensions.dart';
 import 'package:card_game/core/utils/utils.dart';
 import 'package:card_game/feature/language/manager/localizatios.dart';
 import 'package:card_game/feature/menu/presentation/widget/menu_item_widget.dart';
+import 'package:card_game/feature/router/app_router.gr.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -64,7 +65,10 @@ class __MenuPageState extends State<_MenuPage> {
 
   void _onClick(MenuItem item) {
     switch (item) {
-      case MenuItem.quickGame:
+      case MenuItem.createServer:
+        context.pushRoute(const LobbyRoute());
+        break;
+      case MenuItem.connectToServer:
         break;
       case MenuItem.settings:
         break;
