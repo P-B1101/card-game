@@ -8,3 +8,13 @@ sealed class CreateServerEvent extends Equatable {
 }
 
 final class DoCreateServerEvent extends CreateServerEvent {}
+
+final class AddMessageEvent extends CreateServerEvent {
+  final ServerMessage message;
+  const AddMessageEvent({
+    required this.message,
+  });
+
+  @override
+  List<Object> get props => [message];
+}

@@ -20,4 +20,5 @@ class MColors {
   static const primaryColor = Color(0xFFBB4430);
   static const secondaryColor = Color(0xFF231f20);
   static const whiteColor = Color(0xFFFFFFFF);
+  static const grayColor = Color(0xFF808080);
 }

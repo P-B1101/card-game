@@ -1,64 +1,101 @@
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:card_game/feature/user/domain/entity/user.dart';
-import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:socket_io/socket_io.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as socket_io;
+
+import '../../../user/domain/entity/user.dart';
+import '../../domain/entity/server_message.dart';
+import '../model/server_message_model.dart';
 
 abstract class CommandsDataSource {
-  Future<void> createServer();
+  Future<Stream<ServerMessage>> createServer();
 
   Future<void> connectToServer(User user);
 
-  Future<void> disconnect();
+  Future<void> closeServer();
+
+  Future<void> disconnectFromServer(User user);
+
+  Future<void> sendMessage({
+    required User user,
+    required String message,
+  });
 }
 
 @LazySingleton(as: CommandsDataSource)
 class CommandsDataSourceImpl implements CommandsDataSource {
   final Server io;
-
-  const CommandsDataSourceImpl({
+  socket_io.Socket? socket;
+  CommandsDataSourceImpl({
     required this.io,
   });
 
   @override
-  Future<void> createServer() async {
-    debugPrint('creating...');
-    await Future.delayed(const Duration(milliseconds: 500));
+  Future<Stream<ServerMessage>> createServer() async {
+    StreamController<ServerMessage> controller = StreamController();
     var nsp = io.of('/create-server');
     nsp.on('connection', (client) {
-      debugPrint('connection /create-server');
+      // if (client is! Socket) return;
+      // client.once('msg', (data) {
+      //   final header = client.request.headers;
+      //   final user = header.value('user');
+      //   if (user != null) controller.add(ServerMessage.hello(user));
+      // });
       client.on('msg', (data) {
-        debugPrint('data from /create-server => $data');
-        client.emit('fromServer', "ok 2");
+        // if (data is! String) return;
+        if (data is! List) return;
+        final body =
+            json.decode(_readMessage(data.map((e) => e as int).toList()));
+        if (controller.isClosed) return;
+        controller.add(ServerMessageModel.fromJson(body));
       });
     });
-    io.on('connection', (client) {
-      debugPrint('connection default namespace');
-      client.on('msg', (data) {
-        debugPrint('data from default => $data');
-        client.emit('fromServer', "ok");
-      });
-    });
-    await io.listen(3000);
+    // nsp.on('disconnect', (data) {});
+    await io.listen(1212);
+    return controller.stream;
   }
 
   @override
-  Future<void> disconnect() async {
+  Future<void> closeServer() async {
     io.close();
   }
 
   @override
   Future<void> connectToServer(User user) async {
-    IO.Socket socket = IO.io('http://localhost:2000');
+    socket = socket_io.io(
+      'http://localhost:1212/create-server',
+      socket_io.OptionBuilder().setTransports(['websocket']).setExtraHeaders({
+        'user': user.username,
+      }).build(),
+    );
     Completer completer = Completer<bool>();
-    socket.onConnect((_) {
-      debugPrint(_);
-      debugPrint('connect');
-      socket.emit('msg', 'test');
+    socket?.onConnect((_) {
+      final serverMessage = ServerMessageModel.hello(user.username);
+      _sendMessage(json.encode(serverMessage.toJson));
       if (!completer.isCompleted) completer.complete(true);
     });
-    await completer.future.timeout(const Duration(seconds: 10));
+    await completer.future.timeout(const Duration(seconds: 30));
   }
+
+  @override
+  Future<void> disconnectFromServer(User user) async {
+    if (socket == null) return;
+    socket?.disconnect();
+  }
+
+  @override
+  Future<void> sendMessage({
+    required User user,
+    required String message,
+  }) async {
+    final serverMessage = ServerMessageModel.message(user.username, message);
+    _sendMessage(json.encode(serverMessage.toJson));
+  }
+
+  void _sendMessage(String message) =>
+      socket?.emit('msg', utf8.encode(message));
+
+  String _readMessage(List<int> bytes) => utf8.decode(bytes);
 }

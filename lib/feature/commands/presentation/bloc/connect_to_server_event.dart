@@ -16,3 +16,15 @@ final class DoConnectToServerEvent extends ConnectToServerEvent {
   @override
   List<Object> get props => [user];
 }
+
+final class SendMessageToServerEvent extends ConnectToServerEvent {
+  final String message;
+  final User user;
+  const SendMessageToServerEvent({
+    required this.message,
+    required this.user,
+  });
+
+  @override
+  List<Object> get props => [user, message];
+}

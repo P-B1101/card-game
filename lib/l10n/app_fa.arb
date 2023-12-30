@@ -6,5 +6,7 @@
     "menu_item_connect_to_server": "اتصال سرور",
     "menu_item_settings": "تنظیمات",
     "menu_item_exit": "خروج",
-    "menu_title": "بــــازی حــــکم"
+    "menu_title": "بــــازی حــــکم",
+    "user_connected_place_holder": "کاربر $0 وارد لابی شد",
+    "send_message_hint": "ارسال پیام..."
 }

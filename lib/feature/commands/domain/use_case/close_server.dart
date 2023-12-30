@@ -3,17 +3,16 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/use_case/use_case.dart';
-import '../entity/server_message.dart';
 import '../repository/commands_repository.dart';
 
 @lazySingleton
-class CreateServer extends UseCase<Stream<ServerMessage>, NoParams> {
+class CloseServer extends UseCase<void, NoParams> {
   final CommandsRepository repository;
-  const CreateServer({
+  const CloseServer({
     required this.repository,
   });
 
   @override
-  Future<Either<Failure, Stream<ServerMessage>>> call(NoParams param) =>
-      repository.createServer();
+  Future<Either<Failure, void>> call(NoParams param) =>
+      repository.closeServer();
 }

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:card_game/feature/menu/presentation/widget/lobby/message_box_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -49,17 +50,12 @@ class __LobbyPageState extends State<_LobbyPage> {
           listener: (context, state) {},
         ),
       ],
-      child: Scaffold(
+      child: const Scaffold(
         body: Center(
           child: Column(
             children: [
-              BlocBuilder<CreateServerBloc, CreateServerState>(
-                builder: (context, state) => Text(state.toString()),
-              ),
-              const SizedBox(height: 24),
-              BlocBuilder<ConnectToServerBloc, ConnectToServerState>(
-                builder: (context, state) => Text(state.toString()),
-              ),
+              Expanded(child: SizedBox()),
+              MessageBoxWidget(),
             ],
           ),
         ),

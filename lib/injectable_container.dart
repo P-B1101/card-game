@@ -35,5 +35,5 @@ abstract class RegisterFToast {
 @module
 abstract class RegisterServer {
   @lazySingleton
-  Server get server => Server(server: '2000');
+  Server get server => Server();
 }
