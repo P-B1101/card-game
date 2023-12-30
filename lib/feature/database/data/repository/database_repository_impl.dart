@@ -1,3 +1,5 @@
+import 'package:card_game/feature/user/domain/entity/user.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/repository/database_repository.dart';
@@ -10,4 +12,18 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   const DatabaseRepositoryImpl({
     required this.dataSource,
   });
+
+  @override
+  Future<void> saveUsername(String username) =>
+      dataSource.saveUsername(username);
+
+  @override
+  User? getUser() {
+    try {
+      return User(username: dataSource.getUsername());
+    } catch (error) {
+      debugPrint(error.toString());
+      return null;
+    }
+  }
 }

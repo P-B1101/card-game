@@ -28,3 +28,10 @@ enum MenuItem {
   settings,
   exit,
 }
+
+enum ButtonType {
+  fill,
+  outline,
+  text,
+  textAndIcon,
+}

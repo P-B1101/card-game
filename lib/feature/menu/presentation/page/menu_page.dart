@@ -6,7 +6,6 @@ import 'package:card_game/feature/language/manager/localizatios.dart';
 import 'package:card_game/feature/menu/presentation/widget/menu/menu_item_widget.dart';
 import 'package:card_game/feature/router/app_router.gr.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../core/utils/enum.dart';
 

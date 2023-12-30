@@ -4,11 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 
 abstract class DataBaseDataSource {
-  Future<void> saveAuth(String data);
+  Future<void> saveUsername(String username);
 
-  String getAuth();
+  String getUsername();
 
-  String? tryGetAuth();
+  String? tryGetUsername();
 
   Future<void> removeAllData();
 }
@@ -22,12 +22,12 @@ class DataBaseDataSourceImpl implements DataBaseDataSource {
   });
 
   @override
-  Future<void> saveAuth(String data) =>
-      sharedPreferences.setString(_authKey, data);
+  Future<void> saveUsername(String data) =>
+      sharedPreferences.setString(_username, data);
 
   @override
-  String getAuth() {
-    final result = sharedPreferences.getString(_authKey);
+  String getUsername() {
+    final result = sharedPreferences.getString(_username);
     if (result == null) throw const UnAuthorizeException();
     return result;
   }
@@ -36,7 +36,7 @@ class DataBaseDataSourceImpl implements DataBaseDataSource {
   Future<void> removeAllData() => sharedPreferences.clear();
 
   @override
-  String? tryGetAuth() => sharedPreferences.getString(_authKey);
+  String? tryGetUsername() => sharedPreferences.getString(_username);
 }
 
-const _authKey = 'PhOWWARE';
+const _username = 'PhOWWARE';

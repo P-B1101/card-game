@@ -8,4 +8,5 @@ class User extends Equatable {
 
   @override
   List<Object?> get props => [username];
+  factory User.empty() => const User(username: '');
 }

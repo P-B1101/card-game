@@ -8,8 +8,8 @@ import '../../../../../core/utils/utils.dart';
 import '../../../../commands/domain/entity/server_message.dart';
 import '../../../../commands/presentation/bloc/connect_to_server_bloc.dart';
 import '../../../../commands/presentation/bloc/create_server_bloc.dart';
+import '../../../../database/presentation/cubit/username_cubit.dart';
 import '../../../../language/manager/localizatios.dart';
-import '../../../../user/domain/entity/user.dart';
 
 class MessageBoxWidget extends StatefulWidget {
   const MessageBoxWidget({super.key});
@@ -115,10 +115,12 @@ class _MessageBoxWidgetState extends State<MessageBoxWidget> {
 
   void _sendMessage() {
     if (_controller.text.isEmpty) return;
+    final state = context.read<UsernameCubit>().state;
+    if (!state.hasUser) return;
     context.read<ConnectToServerBloc>().add(
           SendMessageToServerEvent(
             message: _controller.text,
-            user: const User(username: 'b1101'),
+            user: state.user,
           ),
         );
     _controller.clear();

@@ -1,6 +1,3 @@
-import 'package:card_game/feature/commands/presentation/bloc/connect_to_server_bloc.dart';
-import 'package:card_game/feature/commands/presentation/bloc/create_server_bloc.dart';
-import 'package:card_game/injectable_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +6,8 @@ import 'package:intl/intl.dart';
 
 import '../../core/utils/assets.dart';
 import '../../core/utils/extensions.dart';
+import '../../injectable_container.dart';
+import '../database/presentation/cubit/username_cubit.dart';
 import '../language/manager/localizatios.dart';
 import 'app_router.dart';
 
@@ -20,11 +19,8 @@ class MyApp extends StatelessWidget {
     final appRouter = AppRouter();
     return MultiBlocProvider(
       providers: [
-        BlocProvider<CreateServerBloc>(
-          create: (context) => getIt<CreateServerBloc>(),
-        ),
-        BlocProvider<ConnectToServerBloc>(
-          create: (context) => getIt<ConnectToServerBloc>(),
+        BlocProvider<UsernameCubit>(
+          create: (context) => getIt<UsernameCubit>(),
         ),
       ],
       child: MaterialApp.router(
