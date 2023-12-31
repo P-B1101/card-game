@@ -35,9 +35,8 @@ class _MessageBoxWidgetState extends State<MessageBoxWidget> {
       builder: (context, state) => Container(
         height: 200,
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: MColors.secondaryColor,
-          border: Border.all(width: 1, color: MColors.primaryColor),
         ),
         child: Column(
           children: [
@@ -53,8 +52,14 @@ class _MessageBoxWidgetState extends State<MessageBoxWidget> {
                   slideCurve: UiUtils.curve,
                   fadeDuration: UiUtils.duration,
                   slideDuration: UiUtils.duration,
-                  child: _MessageItemWidget(
-                    message: state.messages[index],
+                  child: BlocBuilder<UsernameCubit, UsernameState>(
+                    builder: (context, uState) {
+                      return _MessageItemWidget(
+                        message: state.messages[index],
+                        isMe:
+                            state.messages[index].user == uState.user.username,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -130,8 +135,10 @@ class _MessageBoxWidgetState extends State<MessageBoxWidget> {
 
 class _MessageItemWidget extends StatelessWidget {
   final ServerMessage message;
+  final bool isMe;
   const _MessageItemWidget({
     required this.message,
+    required this.isMe,
   });
 
   @override
@@ -163,18 +170,18 @@ class _MessageItemWidget extends StatelessWidget {
                 Text(
                   '${message.user}: ',
                   textAlign: TextAlign.start,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    fontWeight: Fonts.regular500,
-                    color: MColors.whiteColor,
+                    fontWeight: Fonts.black800,
+                    color: isMe ? MColors.seeGreen : MColors.ecru,
                   ),
                 ),
                 Text(
                   message.message,
                   textAlign: TextAlign.start,
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: Fonts.regular500,
+                    fontSize: 13,
+                    fontWeight: Fonts.light300,
                     color: MColors.whiteColor.withOpacity(.9),
                   ),
                 )

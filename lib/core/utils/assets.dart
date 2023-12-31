@@ -18,7 +18,12 @@ class MColors {
   const MColors._();
 
   static const primaryColor = Color(0xFFBB4430);
+  static const ebony = Color(0xFF596157);
+  static const seeGreen = Color(0xFF5B8C5A);
+  static const keppel = Color(0xFF58B09C);
   static const secondaryColor = Color(0xFF231f20);
   static const whiteColor = Color(0xFFFFFFFF);
   static const grayColor = Color(0xFF808080);
+  static const bole = Color(0xFF764134);
+  static const ecru = Color(0xFFAFA060);
 }

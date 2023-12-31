@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:socket_io/socket_io.dart';
 import 'package:socket_io_client/socket_io_client.dart' as socket_io;
@@ -65,10 +64,10 @@ class CommandsDataSourceImpl implements CommandsDataSource {
           .addIfNotExist(NetworkDevice(id: user.username, name: user.username));
       server.emit(_serverList, _listMessage);
       server.on(_serverMessage, (data) {
-        debugPrint('message received in server...');
+        server.broadcast.emit(_clientMessage, data);
         server.emit(_clientMessage, data);
       });
-      server.on(_serverList, (data) => server.emit(_serverList, _listMessage));
+      server.on(_serverList, (data) => server.broadcast.emit(_serverList, _listMessage));
     });
     await io.listen(1212);
   }
@@ -84,9 +83,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   @override
   Future<Stream<ServerMessage>> connectToServer(User user) async {
     StreamController<ServerMessage> controller = StreamController();
-    debugPrint('start listening...');
     socket.on(_clientMessage, (data) {
-      debugPrint('message received...');
       if (data is! List) return;
       final body =
           json.decode(_readMessage(data.map((e) => e as int).toList()));

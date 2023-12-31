@@ -66,7 +66,7 @@ class __LobbyPageState extends State<_LobbyPage> {
         ),
       ],
       child: Scaffold(
-        backgroundColor: MColors.grayColor,
+        backgroundColor: MColors.seeGreen,
         body: Stack(
           children: [
             const Column(

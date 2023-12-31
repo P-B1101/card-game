@@ -162,21 +162,20 @@ class _BodyWidgetState extends State<_BodyWidget> {
         buildWhen: (previous, current) =>
             (previous.showError != current.showError) ||
             (previous.username != current.username),
-        builder: (context, state) {
-          return MInputWidget(
-            controller: _controller,
-            onTextChange: context.read<_Cubit>().updateReason,
-            focusNode: _focusNode,
-            hint: Strings.of(context).user_name,
-            height: UiUtils.inputHeight,
-            error: () {
-              if (!state.showError || !state.invalidUsername) {
-                return null;
-              }
-              return Strings.of(context).user_name_error;
-            }(),
-          );
-        },
+        builder: (context, state) => MInputWidget(
+          controller: _controller,
+          onTextChange: context.read<_Cubit>().updateReason,
+          focusNode: _focusNode,
+          hint: Strings.of(context).user_name,
+          height: UiUtils.inputHeight,
+          onSubmit: (value) => _onSubmitClick(),
+          error: () {
+            if (!state.showError || !state.invalidUsername) {
+              return null;
+            }
+            return Strings.of(context).user_name_error;
+          }(),
+        ),
       );
 
   Widget get _sendReasonButton => BlocBuilder<_Cubit, _State>(
