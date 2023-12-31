@@ -20,7 +20,8 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   User? getUser() {
     try {
-      return User(username: dataSource.getUsername());
+      // return User(username: dataSource.getUsername());
+      return null;
     } catch (error) {
       debugPrint(error.toString());
       return null;

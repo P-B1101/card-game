@@ -1,3 +1,4 @@
+import 'package:card_game/feature/commands/domain/entity/network_device.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
@@ -19,16 +20,16 @@ class CommandsRepositoryImpl implements CommandsRepository {
   });
 
   @override
-  Future<Either<Failure, void>> connectToServer(User user) =>
+  Future<Either<Failure, Stream<ServerMessage>>> connectToServer(User user) =>
       repositoryHelper.tryToLoad(() => dataSource.connectToServer(user));
 
   @override
-  Future<Either<Failure, Stream<ServerMessage>>> createServer() =>
-      repositoryHelper.tryToLoad(() => dataSource.createServer());
+  Future<Either<Failure, void>> createServer(User user) =>
+      repositoryHelper.tryToLoad(() => dataSource.createServer(user));
 
   @override
-  Future<Either<Failure, void>> closeServer() =>
-      repositoryHelper.tryToLoad(() => dataSource.closeServer());
+  Future<Either<Failure, void>> closeServer(User user) =>
+      repositoryHelper.tryToLoad(() => dataSource.closeServer(user));
 
   @override
   Future<Either<Failure, void>> disconnectFromServer(User user) =>
@@ -41,4 +42,8 @@ class CommandsRepositoryImpl implements CommandsRepository {
   }) =>
       repositoryHelper.tryToLoad(
           () => dataSource.sendMessage(user: user, message: message));
+
+  @override
+  Future<Either<Failure, Stream<List<NetworkDevice>>>> getPlayers() =>
+      repositoryHelper.tryToLoad(() => dataSource.getPlayers());
 }

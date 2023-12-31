@@ -1,3 +1,4 @@
+import 'package:card_game/feature/commands/domain/entity/network_device.dart';
 import 'package:flutter/material.dart';
 
 import '../../feature/cards/domain/entity/card.dart';
@@ -48,8 +49,27 @@ extension MCardListExt on List<MCard> {
 extension MenuItemExt on MenuItem {
   String toStringValue(BuildContext context) => switch (this) {
         MenuItem.createServer => Strings.of(context).menu_item_create_server,
-        MenuItem.connectToServer => Strings.of(context).menu_item_connect_to_server,
+        MenuItem.connectToServer =>
+          Strings.of(context).menu_item_connect_to_server,
         MenuItem.settings => Strings.of(context).menu_item_settings,
         MenuItem.exit => Strings.of(context).menu_item_exit,
       };
+}
+
+extension NetworkDeviceListExt on List<NetworkDevice> {
+  void addIfNotExist(NetworkDevice item) {
+    for (int i = 0; i < length; i++) {
+      if (this[i].id == item.id) return;
+    }
+    add(item);
+  }
+
+  void removeIfExist(String id) {
+    for (int i = 0; i < length; i++) {
+      if (this[i].id == id) {
+        removeAt(i);
+        return;
+      }
+    }
+  }
 }

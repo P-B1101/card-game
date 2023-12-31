@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -5,7 +7,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../user/domain/entity/user.dart';
-import '../../domain/use_case/close_server.dart' as cls;
+import '../../domain/entity/server_message.dart';
 import '../../domain/use_case/connect_to_server.dart';
 import '../../domain/use_case/send_message.dart' as send;
 
@@ -16,11 +18,9 @@ part 'connect_to_server_state.dart';
 class ConnectToServerBloc
     extends Bloc<ConnectToServerEvent, ConnectToServerState> {
   final ConnectToServer _connectToServer;
-  final cls.CloseServer _closeServer;
   final send.SendMessage _sendMessage;
   ConnectToServerBloc(
     this._connectToServer,
-    this._closeServer,
     this._sendMessage,
   ) : super(ConnectToServerInitial()) {
     on<DoConnectToServerEvent>(
@@ -31,7 +31,9 @@ class ConnectToServerBloc
       _onSendMessageToServerEvent,
       transformer: droppable(),
     );
+    on<AddMessageFromServerEvent>(_onAddMessageFromServerEvent);
   }
+  StreamSubscription? _sub;
 
   Future<void> _onDoConnectToServerEvent(
     DoConnectToServerEvent event,
@@ -41,7 +43,12 @@ class ConnectToServerBloc
     final result = await _connectToServer(Params(user: event.user));
     final newState = await result.fold(
       (failure) async => failure.toState,
-      (response) async => ConnectToServerSuccess(),
+      (response) async {
+        _sub = response.listen((event) {
+          add(AddMessageFromServerEvent(item: event));
+        });
+        return const ConnectToServerSuccess();
+      },
     );
     emit(newState);
   }
@@ -54,9 +61,22 @@ class ConnectToServerBloc
         send.Params(message: event.message, user: event.user));
     final newState = await result.fold(
       (failure) async => failure.toState,
-      (response) async => ConnectToServerSuccess(),
+      (response) async => const ConnectToServerSuccess(),
     );
     emit(newState);
+  }
+
+  Future<void> _onAddMessageFromServerEvent(
+    AddMessageFromServerEvent event,
+    Emitter<ConnectToServerState> emit,
+  ) async {
+    emit(ConnectToServerSuccess(item: event.item));
+  }
+
+  @override
+  Future<void> close() {
+    _sub?.cancel();
+    return super.close();
   }
 }
 

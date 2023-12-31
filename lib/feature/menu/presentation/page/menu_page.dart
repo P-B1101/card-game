@@ -65,9 +65,10 @@ class __MenuPageState extends State<_MenuPage> {
   void _onClick(MenuItem item) {
     switch (item) {
       case MenuItem.createServer:
-        context.pushRoute(const LobbyRoute());
+        context.pushRoute(LobbyRoute());
         break;
       case MenuItem.connectToServer:
+        context.pushRoute(const ServerListRoute());
         break;
       case MenuItem.settings:
         break;

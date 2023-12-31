@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:card_game/feature/menu/presentation/page/server_list_page.dart';
 import 'package:flutter/material.dart';
 
 import '../board/presentation/page/board_page.dart';
@@ -26,6 +27,12 @@ class AppRouter extends $AppRouter {
         AutoRoute(
           path: '/${BoardPage.path}',
           page: BoardRoute.page,
+          maintainState: false,
+          keepHistory: false,
+        ),
+        AutoRoute(
+          path: '/${ServerListPage.path}',
+          page: ServerListRoute.page,
           maintainState: false,
           keepHistory: false,
         ),

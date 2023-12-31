@@ -12,5 +12,6 @@
     "user_name": "نام کاربری",
     "user_name_description": "برای شروع بازی نام کاربری مورد نظر خود را وارد نمایید.",
     "user_name_error": "وارد کردن نام کاربری الزامی است",
-    "save_label": "ذخیره"
+    "save_label": "ذخیره",
+    "name_label": "نام"
 }

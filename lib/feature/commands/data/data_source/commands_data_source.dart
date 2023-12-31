@@ -1,20 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:socket_io/socket_io.dart';
 import 'package:socket_io_client/socket_io_client.dart' as socket_io;
 
+import '../../../../core/utils/extensions.dart';
 import '../../../user/domain/entity/user.dart';
+import '../../domain/entity/network_device.dart';
 import '../../domain/entity/server_message.dart';
+import '../model/network_device_model.dart';
 import '../model/server_message_model.dart';
 
 abstract class CommandsDataSource {
-  Future<Stream<ServerMessage>> createServer();
+  Future<void> createServer(User user);
 
-  Future<void> connectToServer(User user);
+  Future<Stream<ServerMessage>> connectToServer(User user);
 
-  Future<void> closeServer();
+  Future<void> closeServer(User user);
 
   Future<void> disconnectFromServer(User user);
 
@@ -22,67 +27,80 @@ abstract class CommandsDataSource {
     required User user,
     required String message,
   });
+
+  Future<Stream<List<NetworkDevice>>> getPlayers();
 }
 
 @LazySingleton(as: CommandsDataSource)
 class CommandsDataSourceImpl implements CommandsDataSource {
   final Server io;
-  socket_io.Socket? socket;
+  final socket_io.Socket socket;
+  final List<NetworkDevice> _items = [];
+  Socket? _serverSocket;
+
   CommandsDataSourceImpl({
     required this.io,
+    required this.socket,
   });
 
+  static const _serverList = 'server-list';
+  static const _serverMessage = 'srv-msg';
+  static const _clientMessage = 'clt-msg';
+
+  void _sendClientMessage(String message, [String? event]) =>
+      socket.emit(event ?? _serverMessage, utf8.encode(message));
+
+  String _readMessage(List<int> bytes) => utf8.decode(bytes);
+
+  Uint8List get _listMessage => utf8.encode(json.encode(
+      _items.map((e) => NetworkDeviceModel.fromEntity(e).toJson).toList()));
+
   @override
-  Future<Stream<ServerMessage>> createServer() async {
-    StreamController<ServerMessage> controller = StreamController();
-    var nsp = io.of('/create-server');
-    nsp.on('connection', (client) {
-      // if (client is! Socket) return;
-      // client.once('msg', (data) {
-      //   final header = client.request.headers;
-      //   final user = header.value('user');
-      //   if (user != null) controller.add(ServerMessage.hello(user));
-      // });
-      client.on('msg', (data) {
-        // if (data is! String) return;
-        if (data is! List) return;
-        final body =
-            json.decode(_readMessage(data.map((e) => e as int).toList()));
-        if (controller.isClosed) return;
-        controller.add(ServerMessageModel.fromJson(body));
+  Future<void> createServer(User user) async {
+    final nsp = io.of('/card-game');
+    nsp.on('connection', (server) {
+      if (server is! Socket) return;
+      _serverSocket = server;
+      _items
+          .addIfNotExist(NetworkDevice(id: user.username, name: user.username));
+      server.emit(_serverList, _listMessage);
+      server.on(_serverMessage, (data) {
+        debugPrint('message received in server...');
+        server.emit(_clientMessage, data);
       });
+      server.on(_serverList, (data) => server.emit(_serverList, _listMessage));
     });
-    // nsp.on('disconnect', (data) {});
     await io.listen(1212);
+  }
+
+  @override
+  Future<void> closeServer(User user) async {
+    _items.removeIfExist(user.username);
+    _serverSocket?.emit(_serverList, _listMessage);
+    _serverSocket = null;
+    await io.close();
+  }
+
+  @override
+  Future<Stream<ServerMessage>> connectToServer(User user) async {
+    StreamController<ServerMessage> controller = StreamController();
+    debugPrint('start listening...');
+    socket.on(_clientMessage, (data) {
+      debugPrint('message received...');
+      if (data is! List) return;
+      final body =
+          json.decode(_readMessage(data.map((e) => e as int).toList()));
+      if (controller.isClosed) return;
+      controller.add(ServerMessageModel.fromJson(body));
+    });
+    final serverMessage = ServerMessageModel.hello(user.username);
+    _sendClientMessage(json.encode(serverMessage.toJson));
     return controller.stream;
   }
 
   @override
-  Future<void> closeServer() async {
-    io.close();
-  }
-
-  @override
-  Future<void> connectToServer(User user) async {
-    socket = socket_io.io(
-      'http://localhost:1212/create-server',
-      socket_io.OptionBuilder().setTransports(['websocket']).setExtraHeaders({
-        'user': user.username,
-      }).build(),
-    );
-    Completer completer = Completer<bool>();
-    socket?.onConnect((_) {
-      final serverMessage = ServerMessageModel.hello(user.username);
-      _sendMessage(json.encode(serverMessage.toJson));
-      if (!completer.isCompleted) completer.complete(true);
-    });
-    await completer.future.timeout(const Duration(seconds: 30));
-  }
-
-  @override
   Future<void> disconnectFromServer(User user) async {
-    if (socket == null) return;
-    socket?.disconnect();
+    socket.disconnect();
   }
 
   @override
@@ -91,11 +109,25 @@ class CommandsDataSourceImpl implements CommandsDataSource {
     required String message,
   }) async {
     final serverMessage = ServerMessageModel.message(user.username, message);
-    _sendMessage(json.encode(serverMessage.toJson));
+    _sendClientMessage(json.encode(serverMessage.toJson));
   }
 
-  void _sendMessage(String message) =>
-      socket?.emit('msg', utf8.encode(message));
-
-  String _readMessage(List<int> bytes) => utf8.decode(bytes);
+  @override
+  Future<Stream<List<NetworkDevice>>> getPlayers() async {
+    StreamController<List<NetworkDevice>> controller = StreamController();
+    socket.on(
+      _serverList,
+      (data) {
+        if (data is! List) return;
+        final body =
+            json.decode(_readMessage(data.map((e) => e as int).toList()));
+        if (body is! List) return;
+        if (controller.isClosed) return;
+        controller
+            .add(body.map((e) => NetworkDeviceModel.fromJson(e)).toList());
+      },
+    );
+    _sendClientMessage(_serverList, _serverList);
+    return controller.stream;
+  }
 }

@@ -28,3 +28,12 @@ final class SendMessageToServerEvent extends ConnectToServerEvent {
   @override
   List<Object> get props => [user, message];
 }
+
+final class AddMessageFromServerEvent extends ConnectToServerEvent {
+  final ServerMessage item;
+  const AddMessageFromServerEvent({
+    required this.item,
+  });
+  @override
+  List<Object> get props => [item];
+}
