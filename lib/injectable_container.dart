@@ -1,6 +1,7 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as socket_io;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,3 +49,11 @@ abstract class RegisterSocketIo {
         socket_io.OptionBuilder().setTransports(['websocket']).build(),
       );
 }
+
+
+@module
+abstract class RegisterNetworkInfo {
+  @lazySingleton
+  NetworkInfo get info => NetworkInfo();
+}
+

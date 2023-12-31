@@ -44,6 +44,8 @@ dependencies:
   socket_io_client: ^1.0.1
   socket_io: ^1.0.1
   socket_io_common: ^1.0.1
+  network_info_plus: ^4.1.0
+  connectivity_plus: ^5.0.2
 
 
 
