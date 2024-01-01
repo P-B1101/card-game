@@ -163,8 +163,12 @@ class CommandsDataSourceImpl implements CommandsDataSource {
     final items = await networkManager.getLocalDevices(useCachedData);
     final result = <NetworkDevice>[];
     for (int i = 0; i < items.length; i++) {
-      result.add(
-          NetworkDevice(id: items[i].ip, ip: items[i].ip, name: items[i].name));
+      final device = NetworkDevice(
+        id: items[i].ip,
+        ip: items[i].ip,
+        name: items[i].name,
+      );
+      result.add(device);
     }
     return result;
   }

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:card_game/core/components/container/toolbar_widget.dart';
 import 'package:card_game/feature/commands/presentation/bloc/players_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -70,26 +71,18 @@ class __LobbyPageState extends State<_LobbyPage> {
           listener: (context, state) => _handleConnectToServerState(state),
         ),
       ],
-      child: Scaffold(
+      child: const Scaffold(
         backgroundColor: MColors.ebony,
-        body: Stack(
+        body: Row(
           children: [
-            const Row(
-              children: [
-                UserListWidget(),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(child: SizedBox()),
-                      MessageBoxWidget(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Align(
-              alignment: AlignmentDirectional.topEnd,
-              child: _backButtonWidget,
+            UserListWidget(),
+            Expanded(
+              child: Column(
+                children: [
+                  Expanded(child: SizedBox()),
+                  MessageBoxWidget(),
+                ],
+              ),
             ),
           ],
         ),
@@ -97,17 +90,10 @@ class __LobbyPageState extends State<_LobbyPage> {
     );
   }
 
-  Widget get _backButtonWidget => Builder(
-        builder: (context) => RotatedBox(
-          quarterTurns: 2,
-          child: BackButton(
-            color: MColors.whiteColor,
-            onPressed: () => context.navigateTo(const MenuRoute()),
-          ),
-        ),
-      );
-
   void _handleInitState() {
+    context
+        .read<ToolbarCubit>()
+        .setCallback(() => context.navigateTo(const MenuRoute()));
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final state = context.read<UsernameCubit>().state;
       if (state.hasUser) {

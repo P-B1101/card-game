@@ -8,7 +8,7 @@ void main() async {
   await configureDependencies();
   runApp(const MyApp());
   doWhenWindowReady(() {
-    const initialSize = Size(600, 450);
+    const initialSize = Size(1000, 700);
     appWindow.minSize = initialSize;
     appWindow.size = initialSize;
     appWindow.alignment = Alignment.center;

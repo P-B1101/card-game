@@ -1,11 +1,9 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:card_game/core/components/loading/adaptive_loading_widget.dart';
-import 'package:card_game/core/utils/utils.dart';
-import 'package:card_game/feature/router/app_router.gr.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/components/loading/adaptive_loading_widget.dart';
 import '../../../../../core/utils/assets.dart';
+import '../../../../../core/utils/utils.dart';
 import '../../../../commands/domain/entity/network_device.dart';
 import '../../../../commands/presentation/bloc/network_device_bloc.dart';
 import '../../../../language/manager/localizatios.dart';
@@ -109,7 +107,6 @@ class _ItemWidget extends StatelessWidget {
                           TextAlign.start),
                     ),
                     _isHeader ? _refreshListWidget : const SizedBox(width: 42),
-                    _isHeader ? _backButtonWidget : const SizedBox(width: 42),
                   ],
                 ),
               ),
@@ -130,16 +127,6 @@ class _ItemWidget extends StatelessWidget {
       ],
     );
   }
-
-  Widget get _backButtonWidget => Builder(
-        builder: (context) => RotatedBox(
-          quarterTurns: 2,
-          child: BackButton(
-            color: MColors.whiteColor,
-            onPressed: () => context.navigateTo(const MenuRoute()),
-          ),
-        ),
-      );
 
   Widget get _refreshListWidget => Builder(
         builder: (context) => SizedBox.square(

@@ -43,7 +43,7 @@ class NetworkManagerImpl implements NetworkManager {
         final ip = '$subnet.$i';
         try {
           final socket = await Socket.connect(ip, port,
-              timeout: const Duration(milliseconds: 50));
+              timeout: const Duration(milliseconds: 15));
           final address =
               await InternetAddress(socket.address.address).reverse();
           result.add(Device(name: address.host, ip: ip));
@@ -52,6 +52,7 @@ class NetworkManagerImpl implements NetworkManager {
           continue;
         }
       }
+      _items.clear();
       _items.addAll(result);
       return result;
     } catch (error) {

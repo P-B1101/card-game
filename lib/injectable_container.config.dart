@@ -85,8 +85,10 @@ extension GetItInjectableX on _i1.GetIt {
         ));
     gh.lazySingleton<_i8.DataBaseDataSource>(() => _i8.DataBaseDataSourceImpl(
         sharedPreferences: gh<_i6.SharedPreferences>()));
-    gh.lazySingleton<_i9.DatabaseRepository>(() =>
-        _i10.DatabaseRepositoryImpl(dataSource: gh<_i8.DataBaseDataSource>()));
+    gh.lazySingleton<_i9.DatabaseRepository>(() => _i10.DatabaseRepositoryImpl(
+          dataSource: gh<_i8.DataBaseDataSource>(),
+          networkManager: gh<_i4.NetworkManager>(),
+        ));
     gh.lazySingleton<_i11.GetUsername>(
         () => _i11.GetUsername(repository: gh<_i9.DatabaseRepository>()));
     gh.lazySingleton<_i12.RepositoryHelper>(() => _i12.RepositoryHelperImpl(

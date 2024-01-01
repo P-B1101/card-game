@@ -10,5 +10,5 @@ class GetUsername {
     required this.repository,
   });
 
-  User? call() => repository.getUser();
+  Future<User?> call() => repository.getUser();
 }

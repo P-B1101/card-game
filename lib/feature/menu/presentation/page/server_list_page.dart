@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:card_game/core/components/container/toolbar_widget.dart';
 import 'package:card_game/feature/router/app_router.gr.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,6 +51,9 @@ class __ServerListPageState extends State<_ServerListPage> {
   }
 
   void _handleInitState() {
+    context
+        .read<ToolbarCubit>()
+        .setCallback(() => context.navigateTo(const MenuRoute()));
     context.read<NetworkDeviceBloc>().add(const GetNetworkDeviceEvent());
   }
 

@@ -13,17 +13,18 @@ part 'username_state.dart';
 class UsernameCubit extends Cubit<UsernameState> {
   final SaveUsername _saveUsername;
   final NetworkManager _networkManager;
+  final GetUsername _getUsername;
   UsernameCubit(
     this._saveUsername,
     this._networkManager,
-    GetUsername getUsername,
-  ) : super(() {
-          final user = getUsername();
-          return UsernameState(
-            user: user ?? User.empty(),
-            hasUser: user != null,
-          );
-        }());
+    this._getUsername,
+  ) : super(UsernameState(user: User.empty(), hasUser: false));
+
+  void getUser() async {
+    final user = await _getUsername();
+    if (user == null) return;
+    emit(UsernameState(user: user, hasUser: true));
+  }
 
   Future<User> saveUser(String username) async {
     _saveUsername(username);

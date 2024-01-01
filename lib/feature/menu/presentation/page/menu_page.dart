@@ -1,5 +1,8 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:card_game/core/components/container/toolbar_widget.dart';
+import 'package:card_game/feature/database/presentation/cubit/username_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/assets.dart';
 import '../../../../core/utils/enum.dart';
@@ -31,6 +34,7 @@ class __MenuPageState extends State<_MenuPage> {
   @override
   void initState() {
     super.initState();
+    _handleInitState();
   }
 
   @override
@@ -69,12 +73,19 @@ class __MenuPageState extends State<_MenuPage> {
     );
   }
 
+  void _handleInitState() {
+    context.read<ToolbarCubit>().showBack(false);
+    context.read<UsernameCubit>().getUser();
+  }
+
   void _onClick(MenuItem item) {
     switch (item) {
       case MenuItem.createServer:
+        context.read<ToolbarCubit>().showBack(true);
         context.pushRoute(LobbyRoute());
         break;
       case MenuItem.connectToServer:
+        context.read<ToolbarCubit>().showBack(true);
         context.pushRoute(const ServerListRoute());
         break;
       case MenuItem.settings:
