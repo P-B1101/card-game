@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:card_game/feature/commands/presentation/bloc/players_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,6 +12,7 @@ import '../../../database/presentation/cubit/username_cubit.dart';
 import '../../../dialog/manager/dialog_manager.dart';
 import '../../../router/app_router.gr.dart';
 import '../widget/lobby/message_box_widget.dart';
+import '../widget/lobby/user_list_widget.dart';
 
 @RoutePage()
 class LobbyPage extends StatelessWidget {
@@ -30,6 +32,9 @@ class LobbyPage extends StatelessWidget {
         ),
         BlocProvider<ConnectToServerBloc>(
           create: (context) => getIt<ConnectToServerBloc>(),
+        ),
+        BlocProvider<PlayersBloc>(
+          create: (context) => getIt<PlayersBloc>(),
         ),
       ],
       child: _LobbyPage(device: device),
@@ -69,10 +74,17 @@ class __LobbyPageState extends State<_LobbyPage> {
         backgroundColor: MColors.seeGreen,
         body: Stack(
           children: [
-            const Column(
+            const Row(
               children: [
-                Expanded(child: SizedBox()),
-                MessageBoxWidget(),
+                UserListWidget(),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(child: SizedBox()),
+                      MessageBoxWidget(),
+                    ],
+                  ),
+                ),
               ],
             ),
             Align(
@@ -96,6 +108,7 @@ class __LobbyPageState extends State<_LobbyPage> {
       );
 
   void _handleInitState() {
+    context.read<PlayersBloc>().add(GetPlayersEvent());
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final state = context.read<UsernameCubit>().state;
       if (state.hasUser) {

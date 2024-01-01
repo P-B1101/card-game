@@ -22,5 +22,7 @@ abstract class CommandsRepository {
     required String message,
   });
 
+  Future<Either<Failure, List<NetworkDevice>>> getServers();
+
   Future<Either<Failure, Stream<List<NetworkDevice>>>> getPlayers();
 }

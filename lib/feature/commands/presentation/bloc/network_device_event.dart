@@ -9,12 +9,12 @@ sealed class NetworkDeviceEvent extends Equatable {
 
 final class GetNetworkDeviceEvent extends NetworkDeviceEvent {}
 
-final class AddNetworkDeviceEvent extends NetworkDeviceEvent {
-  final List<NetworkDevice> items;
-  const AddNetworkDeviceEvent({
-    required this.items,
-  });
+// final class AddNetworkDeviceEvent extends NetworkDeviceEvent {
+//   final List<NetworkDevice> items;
+//   const AddNetworkDeviceEvent({
+//     required this.items,
+//   });
 
-  @override
-  List<Object> get props => [items];
-}
+//   @override
+//   List<Object> get props => [items];
+// }

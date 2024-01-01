@@ -32,6 +32,8 @@ abstract class CommandsDataSource {
     required String message,
   });
 
+  Future<List<NetworkDevice>> getServers();
+
   Future<Stream<List<NetworkDevice>>> getPlayers();
 }
 
@@ -40,8 +42,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   final Server server;
   final NetworkManager networkManager;
   final List<NetworkDevice> _items = [];
-  socket_io.Socket? socket;
-  Socket? _serverSocket;
+  socket_io.Socket? clientSocket;
+  // Socket? _serverSocket;
 
   CommandsDataSourceImpl({
     required this.server,
@@ -52,9 +54,11 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   static const _serverList = 'server-list';
   static const _serverMessage = 'srv-msg';
   static const _clientMessage = 'clt-msg';
+  static const _leaveLobby = 'lve-lby';
+  static const _joinLobby = 'jn-lby';
 
   void _sendClientMessage(String message, [String? event]) =>
-      socket?.emit(event ?? _serverMessage, utf8.encode(message));
+      clientSocket?.emit(event ?? _serverMessage, utf8.encode(message));
 
   String _readMessage(List<int> bytes) => utf8.decode(bytes);
 
@@ -66,28 +70,42 @@ class CommandsDataSourceImpl implements CommandsDataSource {
     final nsp = server.of('/card-game');
     nsp.on('connection', (server) {
       if (server is! Socket) return;
-      _serverSocket = server;
-      _items.addIfNotExist(NetworkDevice(
-        id: user.username,
-        name: user.username,
-        ip: user.ip,
-      ));
+      // _serverSocket = server;
+      // _items.addIfNotExist(NetworkDevice(
+      //   id: user.ip,
+      //   name: user.username,
+      //   ip: user.ip,
+      // ));
       server.emit(_serverList, _listMessage);
       server.on(_serverMessage, (data) {
         server.broadcast.emit(_clientMessage, data);
         server.emit(_clientMessage, data);
       });
-      server.on(_serverList,
-          (data) => server.broadcast.emit(_serverList, _listMessage));
+      server.on(_serverList, (data) {
+        server.broadcast.emit(_serverList, _listMessage);
+        server.emit(_serverList, _listMessage);
+      });
+      server.on(_leaveLobby, (data) {
+        if (data is! List) return;
+        final ip = _readMessage(data.map((e) => e as int).toList());
+        _items.removeIfExist(ip);
+        server.broadcast.emit(_serverList, _listMessage);
+        server.emit(_serverList, _listMessage);
+      });
+      server.on(_joinLobby, (data) {
+        if (data is! List) return;
+        final body = _readMessage(data.map((e) => e as int).toList());
+        _items.addIfNotExist(NetworkDeviceModel.fromJson(json.decode(body)));
+        server.broadcast.emit(_serverList, _listMessage);
+        server.emit(_serverList, _listMessage);
+      });
     });
     await server.listen(1212);
   }
 
   @override
   Future<void> closeServer(User user) async {
-    _items.removeIfExist(user.username);
-    _serverSocket?.emit(_serverList, _listMessage);
-    _serverSocket = null;
+    // _serverSocket = null;
     await server.close();
   }
 
@@ -100,17 +118,20 @@ class CommandsDataSourceImpl implements CommandsDataSource {
     final host = server?.ip ?? 'localhost';
     final uri = 'http://$host:1212/card-game';
     debugPrint('try to connect to $uri ...');
-    socket = socket_io.io(
+    clientSocket = socket_io.io(
       uri,
       socket_io.OptionBuilder().setTransports(['websocket']).build(),
     );
-    socket?.on(_clientMessage, (data) {
+    clientSocket?.on(_clientMessage, (data) {
       if (data is! List) return;
       final body =
           json.decode(_readMessage(data.map((e) => e as int).toList()));
       if (controller.isClosed) return;
       controller.add(ServerMessageModel.fromJson(body));
     });
+    final device =
+        NetworkDeviceModel(id: user.ip, name: user.username, ip: user.ip);
+    _sendClientMessage(json.encode(device.toJson), _joinLobby);
     final serverMessage = ServerMessageModel.hello(user.username);
     _sendClientMessage(json.encode(serverMessage.toJson));
     return controller.stream;
@@ -118,7 +139,9 @@ class CommandsDataSourceImpl implements CommandsDataSource {
 
   @override
   Future<void> disconnectFromServer(User user) async {
-    socket?.disconnect();
+    _sendClientMessage(user.ip, _leaveLobby);
+    clientSocket?.disconnect();
+    clientSocket = null;
   }
 
   @override
@@ -131,28 +154,34 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   }
 
   @override
-  Future<Stream<List<NetworkDevice>>> getPlayers() async {
-    StreamController<List<NetworkDevice>> controller = StreamController();
+  Future<List<NetworkDevice>> getServers() async {
     final items = await networkManager.getLocalDevices();
     final result = <NetworkDevice>[];
     for (int i = 0; i < items.length; i++) {
       result.add(
           NetworkDevice(id: items[i].ip, ip: items[i].ip, name: items[i].name));
     }
-    // socket?.on(
-    //   _serverList,
-    //   (data) {
-    //     if (data is! List) return;
-    //     final body =
-    //         json.decode(_readMessage(data.map((e) => e as int).toList()));
-    //     if (body is! List) return;
-    //     if (controller.isClosed) return;
-    //     controller
-    //         .add(body.map((e) => NetworkDeviceModel.fromJson(e)).toList());
-    //   },
-    // );
-    _sendClientMessage(_serverList, _serverList);
-    controller.add(result);
+    return result;
+  }
+
+  @override
+  Future<Stream<List<NetworkDevice>>> getPlayers() async {
+    StreamController<List<NetworkDevice>> controller = StreamController();
+    clientSocket?.on(
+      _serverList,
+      (data) {
+        if (data is! List) return;
+        final body =
+            json.decode(_readMessage(data.map((e) => e as int).toList()));
+        if (body is! List) return;
+        if (controller.isClosed) return;
+        controller
+            .add(body.map((e) => NetworkDeviceModel.fromJson(e)).toList());
+      },
+    );
+    Future.delayed(const Duration(milliseconds: 500)).then((value) {
+      _sendClientMessage(_serverList, _serverList);
+    });
     return controller.stream;
   }
 }

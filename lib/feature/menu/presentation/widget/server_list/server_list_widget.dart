@@ -1,4 +1,6 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:card_game/core/components/loading/adaptive_loading_widget.dart';
+import 'package:card_game/core/utils/utils.dart';
 import 'package:card_game/feature/router/app_router.gr.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,14 +21,29 @@ class ServerListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NetworkDeviceBloc, NetworkDeviceState>(
-      builder: (context, state) => ListView.builder(
-        itemCount: state.items.length + 1,
-        shrinkWrap: true,
-        itemBuilder: (context, index) => _ItemWidget(
-          index: index,
-          item: index == 0 ? null : state.items[index - 1],
-          onClick: onClick,
-        ),
+      builder: (context, state) => AnimatedSwitcher(
+        duration: UiUtils.duration,
+        switchInCurve: Curves.easeIn,
+        switchOutCurve: Curves.easeOut,
+        child: () {
+          final isLoading =
+              state is NetworkDeviceLoadingState && state.items.isEmpty;
+          if (isLoading) return const Center(child: AdaptiveLoadingWidget());
+          if (state is NetworkDeviceFailureState) {
+            return Center(
+              child: Text(Strings.of(context).general_error),
+            );
+          }
+          return ListView.builder(
+            itemCount: state.items.length + 1,
+            shrinkWrap: true,
+            itemBuilder: (context, index) => _ItemWidget(
+              index: index,
+              item: index == 0 ? null : state.items[index - 1],
+              onClick: onClick,
+            ),
+          );
+        }(),
       ),
     );
   }
@@ -69,7 +86,20 @@ class _ItemWidget extends StatelessWidget {
                         : item?.name ?? '-',
                   ),
                 ),
-                _isHeader ? _backButtonWidget : _Title(item?.ip ?? '-'),
+                Container(
+                  width: 1.5,
+                  height: 12,
+                  color: _isHeader ? MColors.grayColor : Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                SizedBox(
+                  width: 150,
+                  child: _Title(
+                    _isHeader ? Strings.of(context).ip_label : item?.ip ?? '-',
+                    TextAlign.start
+                  ),
+                ),
+                _isHeader ? _backButtonWidget : const SizedBox(width: 42),
               ],
             ),
           ),
@@ -93,12 +123,14 @@ class _ItemWidget extends StatelessWidget {
 
 class _Title extends StatelessWidget {
   final String text;
-  const _Title(this.text);
+  final TextAlign? textAlign;
+  const _Title(this.text, [this.textAlign]);
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
+      textAlign: textAlign,
       style: const TextStyle(
         fontSize: 14,
         color: MColors.whiteColor,

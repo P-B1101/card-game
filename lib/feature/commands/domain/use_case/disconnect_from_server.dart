@@ -7,9 +7,9 @@ import '../../../user/domain/entity/user.dart';
 import '../repository/commands_repository.dart';
 
 @lazySingleton
-class DisconnectServer extends UseCase<void, Params> {
+class DisconnectFromServer extends UseCase<void, Params> {
   final CommandsRepository repository;
-  const DisconnectServer({
+  const DisconnectFromServer({
     required this.repository,
   });
 

@@ -48,6 +48,10 @@ class CommandsRepositoryImpl implements CommandsRepository {
           () => dataSource.sendMessage(user: user, message: message));
 
   @override
+  Future<Either<Failure, List<NetworkDevice>>> getServers() =>
+      repositoryHelper.tryToLoad(() => dataSource.getServers());
+
+  @override
   Future<Either<Failure, Stream<List<NetworkDevice>>>> getPlayers() =>
       repositoryHelper.tryToLoad(() => dataSource.getPlayers());
 }
