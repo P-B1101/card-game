@@ -5,7 +5,6 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/use_case/use_case.dart';
 import '../../domain/entity/network_device.dart';
 import '../../domain/use_case/get_servers.dart';
 
@@ -26,7 +25,7 @@ class NetworkDeviceBloc extends Bloc<NetworkDeviceEvent, NetworkDeviceState> {
     Emitter<NetworkDeviceState> emit,
   ) async {
     emit(NetworkDeviceLoadingState(items: state.items));
-    final result = await _getServers(const NoParams());
+    final result = await _getServers(Params(useCachedData: event.useCachedData));
     final newState = await result.fold(
       (failure) async => NetworkDeviceFailureState(),
       (response) async => AddNetworkDeviceState(items: response),

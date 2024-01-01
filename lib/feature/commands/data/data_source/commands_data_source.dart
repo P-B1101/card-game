@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:card_game/feature/user/data/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:socket_io/socket_io.dart';
@@ -32,7 +33,7 @@ abstract class CommandsDataSource {
     required String message,
   });
 
-  Future<List<NetworkDevice>> getServers();
+  Future<List<NetworkDevice>> getServers(bool useCachedData);
 
   Future<Stream<List<NetworkDevice>>> getPlayers();
 }
@@ -87,8 +88,9 @@ class CommandsDataSourceImpl implements CommandsDataSource {
       });
       server.on(_leaveLobby, (data) {
         if (data is! List) return;
-        final ip = _readMessage(data.map((e) => e as int).toList());
-        _items.removeIfExist(ip);
+        final body = _readMessage(data.map((e) => e as int).toList());
+        final user = UserModel.fromJson(json.decode(body));
+        _items.removeIfExist(user.ip);
         server.broadcast.emit(_serverList, _listMessage);
         server.emit(_serverList, _listMessage);
       });
@@ -139,7 +141,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
 
   @override
   Future<void> disconnectFromServer(User user) async {
-    _sendClientMessage(user.ip, _leaveLobby);
+    _sendClientMessage(
+        json.encode(UserModel.fromEntity(user).toJson), _leaveLobby);
     clientSocket?.disconnect();
     clientSocket = null;
   }
@@ -154,8 +157,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   }
 
   @override
-  Future<List<NetworkDevice>> getServers() async {
-    final items = await networkManager.getLocalDevices();
+  Future<List<NetworkDevice>> getServers(bool useCachedData) async {
+    final items = await networkManager.getLocalDevices(useCachedData);
     final result = <NetworkDevice>[];
     for (int i = 0; i < items.length; i++) {
       result.add(

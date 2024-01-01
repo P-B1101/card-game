@@ -7,13 +7,23 @@ import '../entity/network_device.dart';
 import '../repository/commands_repository.dart';
 
 @lazySingleton
-class GetServers extends UseCase<List<NetworkDevice>, NoParams> {
+class GetServers extends UseCase<List<NetworkDevice>, Params> {
   final CommandsRepository repository;
   const GetServers({
     required this.repository,
   });
 
   @override
-  Future<Either<Failure, List<NetworkDevice>>> call(NoParams param) =>
-      repository.getServers();
+  Future<Either<Failure, List<NetworkDevice>>> call(Params param) =>
+      repository.getServers(param.useCachedData);
+}
+
+class Params extends NoParams {
+  final bool useCachedData;
+  const Params({
+    required this.useCachedData,
+  });
+
+  @override
+  List<Object?> get props => [useCachedData];
 }

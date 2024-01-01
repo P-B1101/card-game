@@ -1,4 +1,5 @@
 import 'package:animation_wrappers/animations/faded_slide_animation.dart';
+import 'package:card_game/core/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -151,19 +152,14 @@ class _MessageItemWidget extends StatelessWidget {
         top: 4,
         bottom: 4,
       ),
-      child: message.isFirstConnection
+      child: message.status != ServerMessageStatus.message
           ? Text(
-              message.isFirstConnection
-                  ? Strings.of(context)
-                      .user_connected_place_holder
-                      .replaceFirst('\$0', message.user)
-                  : '${message.user}: ${message.message}',
+              message.status.toStringValue(context, message.user),
               textAlign: TextAlign.start,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: Fonts.regular500,
-                color: MColors.whiteColor
-                    .withOpacity(message.isFirstConnection ? .5 : 1),
+                color: MColors.whiteColor.withOpacity(.5),
               ),
             )
           : Row(

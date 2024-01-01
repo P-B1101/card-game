@@ -26,9 +26,11 @@ class ServerListWidget extends StatelessWidget {
         switchInCurve: Curves.easeIn,
         switchOutCurve: Curves.easeOut,
         child: () {
-          final isLoading =
+          final mainLoading =
               state is NetworkDeviceLoadingState && state.items.isEmpty;
-          if (isLoading) return const Center(child: AdaptiveLoadingWidget());
+          final loading =
+              state is NetworkDeviceLoadingState && state.items.isNotEmpty;
+          if (mainLoading) return const Center(child: AdaptiveLoadingWidget());
           if (state is NetworkDeviceFailureState) {
             return Center(
               child: Text(Strings.of(context).general_error),
@@ -38,6 +40,7 @@ class ServerListWidget extends StatelessWidget {
             itemCount: state.items.length + 1,
             shrinkWrap: true,
             itemBuilder: (context, index) => _ItemWidget(
+              isLoading: loading,
               index: index,
               item: index == 0 ? null : state.items[index - 1],
               onClick: onClick,
@@ -52,59 +55,79 @@ class ServerListWidget extends StatelessWidget {
 class _ItemWidget extends StatelessWidget {
   final NetworkDevice? item;
   final int index;
+  final bool isLoading;
   final Function(NetworkDevice) onClick;
   const _ItemWidget({
     required this.index,
     required this.item,
     required this.onClick,
+    required this.isLoading,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      width: double.infinity,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: item == null ? null : () => onClick(item!),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                _Title(_isHeader ? '#' : index.toString()),
-                Container(
-                  width: 1.5,
-                  height: 12,
-                  color: _isHeader ? MColors.grayColor : Colors.transparent,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 48,
+          width: double.infinity,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: item == null ? null : () => onClick(item!),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    _Title(_isHeader ? '#' : index.toString()),
+                    Container(
+                      width: 1.5,
+                      height: 12,
+                      color: _isHeader ? MColors.grayColor : Colors.transparent,
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    Expanded(
+                      child: _Title(
+                        _isHeader
+                            ? Strings.of(context).name_label
+                            : item?.name ?? '-',
+                      ),
+                    ),
+                    Container(
+                      width: 1.5,
+                      height: 12,
+                      color: _isHeader ? MColors.grayColor : Colors.transparent,
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    SizedBox(
+                      width: 150,
+                      child: _Title(
+                          _isHeader
+                              ? Strings.of(context).ip_label
+                              : item?.ip ?? '-',
+                          TextAlign.start),
+                    ),
+                    _isHeader ? _refreshListWidget : const SizedBox(width: 42),
+                    _isHeader ? _backButtonWidget : const SizedBox(width: 42),
+                  ],
                 ),
-                Expanded(
-                  child: _Title(
-                    _isHeader
-                        ? Strings.of(context).name_label
-                        : item?.name ?? '-',
-                  ),
-                ),
-                Container(
-                  width: 1.5,
-                  height: 12,
-                  color: _isHeader ? MColors.grayColor : Colors.transparent,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                ),
-                SizedBox(
-                  width: 150,
-                  child: _Title(
-                    _isHeader ? Strings.of(context).ip_label : item?.ip ?? '-',
-                    TextAlign.start
-                  ),
-                ),
-                _isHeader ? _backButtonWidget : const SizedBox(width: 42),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        AnimatedSwitcher(
+          duration: UiUtils.duration,
+          switchInCurve: Curves.easeIn,
+          switchOutCurve: Curves.easeOut,
+          child: SizedBox(
+            height: 2,
+            child: isLoading && _isHeader
+                ? const LinearProgressIndicator()
+                : const SizedBox(),
+          ),
+        ),
+      ],
     );
   }
 
@@ -116,6 +139,26 @@ class _ItemWidget extends StatelessWidget {
             onPressed: () => context.navigateTo(const MenuRoute()),
           ),
         ),
+      );
+
+  Widget get _refreshListWidget => Builder(
+        builder: (context) => SizedBox.square(
+            dimension: 42,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => context
+                    .read<NetworkDeviceBloc>()
+                    .add(const GetNetworkDeviceEvent(useCachedData: false)),
+                customBorder: const CircleBorder(),
+                child: const Center(
+                  child: Icon(
+                    Icons.refresh_rounded,
+                    color: MColors.whiteColor,
+                  ),
+                ),
+              ),
+            )),
       );
 
   bool get _isHeader => item == null;

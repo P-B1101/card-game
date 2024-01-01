@@ -7,7 +7,14 @@ sealed class NetworkDeviceEvent extends Equatable {
   List<Object> get props => [];
 }
 
-final class GetNetworkDeviceEvent extends NetworkDeviceEvent {}
+final class GetNetworkDeviceEvent extends NetworkDeviceEvent {
+  final bool useCachedData;
+  const GetNetworkDeviceEvent({
+    this.useCachedData = true,
+  });
+  @override
+  List<Object> get props => [useCachedData];
+}
 
 // final class AddNetworkDeviceEvent extends NetworkDeviceEvent {
 //   final List<NetworkDevice> items;

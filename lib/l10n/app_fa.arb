@@ -8,6 +8,7 @@
     "menu_item_exit": "خروج",
     "menu_title": "بــــازی حــــکم",
     "user_connected_place_holder": "کاربر $0 وارد لابی شد",
+    "user_disconnected_place_holder": "کاربر $0 از لابی خارج شد",
     "send_message_hint": "ارسال پیام...",
     "user_name": "نام کاربری",
     "user_name_description": "برای شروع بازی نام کاربری مورد نظر خود را وارد نمایید.",

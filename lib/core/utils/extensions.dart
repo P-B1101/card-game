@@ -1,10 +1,20 @@
-import 'package:card_game/feature/commands/domain/entity/network_device.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 import '../../feature/cards/domain/entity/card.dart';
+import '../../feature/commands/domain/entity/network_device.dart';
 import '../../feature/language/manager/localizatios.dart';
 import '../../feature/user/domain/entity/user.dart';
 import 'enum.dart';
+
+extension StringExt on String {
+  ServerMessageStatus? get toServerMessageStatus => switch (this) {
+        'msg' => ServerMessageStatus.message,
+        'jn' => ServerMessageStatus.join,
+        'lve' => ServerMessageStatus.leave,
+        _ => null,
+      };
+}
 
 extension DoubleExt on double {
   bool get isSmall => this <= 360;
@@ -71,5 +81,31 @@ extension NetworkDeviceListExt on List<NetworkDevice> {
         return;
       }
     }
+  }
+}
+
+extension MapStringDynamicExt on Map<String, dynamic> {
+  T? toEnum<T extends Enum>(String key, T? Function(String value) converter) {
+    final value = this[key];
+    if (value is! String) return null;
+    return converter(value);
+  }
+
+  T? toModel<T extends Equatable>(
+    String key,
+    T? Function(dynamic value) converter,
+  ) {
+    final value = this[key];
+    if (value == null) return null;
+    return converter(value);
+  }
+
+  List<T> toListModel<T extends Equatable>(
+    String key,
+    T Function(dynamic value) converter,
+  ) {
+    final value = this[key];
+    if (value is! List) return <T>[];
+    return value.map((e) => converter(e)).toList();
   }
 }

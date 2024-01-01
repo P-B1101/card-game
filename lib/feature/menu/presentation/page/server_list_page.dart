@@ -50,7 +50,7 @@ class __ServerListPageState extends State<_ServerListPage> {
   }
 
   void _handleInitState() {
-    context.read<NetworkDeviceBloc>().add(GetNetworkDeviceEvent());
+    context.read<NetworkDeviceBloc>().add(const GetNetworkDeviceEvent());
   }
 
   void _onServerClick(NetworkDevice device) {
