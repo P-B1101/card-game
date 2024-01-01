@@ -110,6 +110,7 @@ class _MessageBoxWidgetState extends State<MessageBoxWidget> {
                 quarterTurns: 2,
                 child: Icon(
                   Icons.send_rounded,
+                  size: 28,
                   color: MColors.whiteColor,
                 ),
               ),

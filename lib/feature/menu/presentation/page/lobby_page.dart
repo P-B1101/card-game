@@ -71,7 +71,7 @@ class __LobbyPageState extends State<_LobbyPage> {
         ),
       ],
       child: Scaffold(
-        backgroundColor: MColors.seeGreen,
+        backgroundColor: MColors.ebony,
         body: Stack(
           children: [
             const Row(
@@ -108,7 +108,6 @@ class __LobbyPageState extends State<_LobbyPage> {
       );
 
   void _handleInitState() {
-    context.read<PlayersBloc>().add(GetPlayersEvent());
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final state = context.read<UsernameCubit>().state;
       if (state.hasUser) {
@@ -168,6 +167,7 @@ class __LobbyPageState extends State<_LobbyPage> {
       context
           .read<CreateServerBloc>()
           .add(AddMessageEvent(message: state.item!));
+      context.read<PlayersBloc>().add(GetPlayersEvent());
     }
   }
 

@@ -15,18 +15,15 @@ class UserListWidget extends StatelessWidget {
         builder: (context, uState) => Container(
           width: 200,
           height: double.infinity,
-          color: MColors.ecru,
+          color: MColors.bole,
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 6),
             itemBuilder: (context, index) => _ItemWidget(
-              name: index == 0
-                  ? uState.user.username
-                  : state.items[index - 1].name,
-              isMe: index == 0,
+              name: state.items[index].name,
+              isMe: state.items[index].ip == uState.user.ip,
             ),
-            itemCount: state.items.length + 1,
+            itemCount: state.items.length,
             shrinkWrap: true,
-            // reverse: true,
           ),
         ),
       ),
@@ -50,7 +47,7 @@ class _ItemWidget extends StatelessWidget {
         name,
         style: TextStyle(
           fontSize: 16,
-          color: isMe ? MColors.secondaryColor : MColors.whiteColor,
+          color: isMe ? MColors.seeGreen : MColors.whiteColor,
           fontWeight: Fonts.medium600,
         ),
       ),
