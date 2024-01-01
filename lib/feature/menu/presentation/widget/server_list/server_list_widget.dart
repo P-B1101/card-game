@@ -77,7 +77,7 @@ class _ItemWidget extends StatelessWidget {
             child: InkWell(
               onTap: item == null ? null : () => onClick(item!),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsetsDirectional.only(start: 16, end: 8),
                 child: Row(
                   children: [
                     _Title(_isHeader ? '#' : index.toString()),
