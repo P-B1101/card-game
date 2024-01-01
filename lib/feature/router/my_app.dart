@@ -1,10 +1,10 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/components/container/toolbar_widget.dart';
 import '../../core/utils/assets.dart';
 import '../../core/utils/extensions.dart';
 import '../../injectable_container.dart';
@@ -61,7 +61,9 @@ class MyApp extends StatelessWidget {
                 textScaler: TextScaler.linear(scaleFactor),
                 boldText: false,
               ),
-              child: MoveWindow(child: UsernameWidget(child: child!)),
+              child: ToolbarWidget(
+                child: UsernameWidget(child: child!),
+              ),
             ),
           );
         },

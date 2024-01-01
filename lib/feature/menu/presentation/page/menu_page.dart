@@ -51,13 +51,15 @@ class __MenuPageState extends State<_MenuPage> {
               ),
             ),
             const SizedBox(height: 32),
-            ListView.builder(
-              itemCount: MenuItem.values.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) => Center(
-                child: MenuItemWidget(
-                  title: MenuItem.values[index].toStringValue(context),
-                  onClick: () => _onClick(MenuItem.values[index]),
+            Flexible(
+              child: ListView.builder(
+                itemCount: MenuItem.values.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) => Center(
+                  child: MenuItemWidget(
+                    title: MenuItem.values[index].toStringValue(context),
+                    onClick: () => _onClick(MenuItem.values[index]),
+                  ),
                 ),
               ),
             ),
