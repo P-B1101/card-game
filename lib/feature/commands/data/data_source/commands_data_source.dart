@@ -142,6 +142,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   @override
   Future<void> disconnectFromServer(User user) async {
     _sendClientMessage(
+        json.encode(ServerMessageModel.goodby(user.username).toJson));
+    _sendClientMessage(
         json.encode(UserModel.fromEntity(user).toJson), _leaveLobby);
     clientSocket?.disconnect();
     clientSocket = null;
