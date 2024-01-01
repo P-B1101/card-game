@@ -8,7 +8,10 @@ import '../entity/server_message.dart';
 abstract class CommandsRepository {
   Future<Either<Failure, void>> createServer(User user);
 
-  Future<Either<Failure, Stream<ServerMessage>>> connectToServer(User user);
+  Future<Either<Failure, Stream<ServerMessage>>> connectToServer(
+    User user,
+    NetworkDevice? server,
+  );
 
   Future<Either<Failure, void>> closeServer(User user);
 

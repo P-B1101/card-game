@@ -1,15 +1,13 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:card_game/core/manager/network_manager.dart';
-import 'package:card_game/core/utils/assets.dart';
-import 'package:card_game/core/utils/extensions.dart';
-import 'package:card_game/core/utils/utils.dart';
-import 'package:card_game/feature/language/manager/localizatios.dart';
-import 'package:card_game/feature/menu/presentation/widget/menu/menu_item_widget.dart';
-import 'package:card_game/feature/router/app_router.gr.dart';
-import 'package:card_game/injectable_container.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/assets.dart';
 import '../../../../core/utils/enum.dart';
+import '../../../../core/utils/extensions.dart';
+import '../../../../core/utils/utils.dart';
+import '../../../language/manager/localizatios.dart';
+import '../../../router/app_router.gr.dart';
+import '../widget/menu/menu_item_widget.dart';
 
 @RoutePage()
 class MenuPage extends StatelessWidget {
@@ -33,7 +31,6 @@ class __MenuPageState extends State<_MenuPage> {
   @override
   void initState() {
     super.initState();
-    _handleInitState();
   }
 
   @override
@@ -68,14 +65,6 @@ class __MenuPageState extends State<_MenuPage> {
         ),
       ),
     );
-  }
-
-  void _handleInitState() async {
-    final info = getIt<NetworkManager>();
-    final items = await info.getLocalDevices();
-    for (var element in items) {
-      debugPrint(element.toString());
-    }
   }
 
   void _onClick(MenuItem item) {

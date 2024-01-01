@@ -69,7 +69,7 @@ class _ItemWidget extends StatelessWidget {
                         : item?.name ?? '-',
                   ),
                 ),
-                if (_isHeader) _backButtonWidget,
+                _isHeader ? _backButtonWidget : _Title(item?.ip ?? '-'),
               ],
             ),
           ),

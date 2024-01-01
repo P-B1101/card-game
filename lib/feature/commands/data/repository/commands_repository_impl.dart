@@ -20,8 +20,12 @@ class CommandsRepositoryImpl implements CommandsRepository {
   });
 
   @override
-  Future<Either<Failure, Stream<ServerMessage>>> connectToServer(User user) =>
-      repositoryHelper.tryToLoad(() => dataSource.connectToServer(user));
+  Future<Either<Failure, Stream<ServerMessage>>> connectToServer(
+    User user,
+    NetworkDevice? server,
+  ) =>
+      repositoryHelper
+          .tryToLoad(() => dataSource.connectToServer(user, server));
 
   @override
   Future<Either<Failure, void>> createServer(User user) =>

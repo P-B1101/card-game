@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:card_game/feature/commands/domain/entity/network_device.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
@@ -40,7 +41,8 @@ class ConnectToServerBloc
     Emitter<ConnectToServerState> emit,
   ) async {
     emit(ConnectToServerLoading());
-    final result = await _connectToServer(Params(user: event.user));
+    final result =
+        await _connectToServer(Params(user: event.user, server: event.server));
     final newState = await result.fold(
       (failure) async => failure.toState,
       (response) async {

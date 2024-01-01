@@ -115,9 +115,10 @@ class __LobbyPageState extends State<_LobbyPage> {
   void _joinToServer() {
     final state = context.read<UsernameCubit>().state;
     if (state.hasUser) {
-      context
-          .read<ConnectToServerBloc>()
-          .add(DoConnectToServerEvent(user: state.user));
+      context.read<ConnectToServerBloc>().add(DoConnectToServerEvent(
+            user: state.user,
+            server: widget.device,
+          ));
       return;
     }
     _showGetUsername();
@@ -131,11 +132,10 @@ class __LobbyPageState extends State<_LobbyPage> {
       context.pushRoute(const MenuRoute());
       return;
     }
-    final user = context.read<UsernameCubit>().saveUser(username);
+    final user = await context.read<UsernameCubit>().saveUser(username);
+    if (!mounted) return;
     if (_isServer) {
-      context
-          .read<CreateServerBloc>()
-          .add(DoCreateServerEvent(user: user));
+      context.read<CreateServerBloc>().add(DoCreateServerEvent(user: user));
     } else {
       _joinToServer();
     }

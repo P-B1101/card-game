@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:card_game/core/manager/network_manager.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
@@ -11,8 +12,10 @@ part 'username_state.dart';
 @injectable
 class UsernameCubit extends Cubit<UsernameState> {
   final SaveUsername _saveUsername;
+  final NetworkManager _networkManager;
   UsernameCubit(
     this._saveUsername,
+    this._networkManager,
     GetUsername getUsername,
   ) : super(() {
           final user = getUsername();
@@ -22,9 +25,10 @@ class UsernameCubit extends Cubit<UsernameState> {
           );
         }());
 
-  User saveUser(String username) {
+  Future<User> saveUser(String username) async {
     _saveUsername(username);
-    final user = User(username: username);
+    final ip = await _networkManager.getMyIp();
+    final user = User(username: username, ip: ip);
     emit(UsernameState(user: user, hasUser: true));
     return user;
   }

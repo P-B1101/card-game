@@ -1,52 +1,58 @@
 import 'dart:io';
 
+import 'package:card_game/core/error/exceptions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:network_info_plus/network_info_plus.dart';
 
 import 'device.dart';
 
 abstract class NetworkManager {
-  Future<List<Device>> getLocalDevices();
+  Future<List<Device>> getLocalDevices([bool useCachedData = true]);
+  Future<String> getMyIp();
 }
 
 @LazySingleton(as: NetworkManager)
 class NetworkManagerImpl implements NetworkManager {
-  final NetworkInfo info;
-
-  const NetworkManagerImpl({
-    required this.info,
-  });
+  final List<Device> _items = [];
+  NetworkManagerImpl();
 
   @override
-  Future<List<Device>> getLocalDevices() async {
-    try {
-      final items = await NetworkInterface.list();
-      final addresses = <String>[];
-      for (int i = 0; i < items.length; i++) {
-        for (var element in items[i].addresses) {
-          addresses.add(element.address);
-        }
+  Future<String> getMyIp() async {
+    final items = await NetworkInterface.list();
+    final addresses = <String>[];
+    for (int i = 0; i < items.length; i++) {
+      for (var element in items[i].addresses) {
+        addresses.add(element.address);
       }
-      final mIP = addresses.firstOrNull;
-      debugPrint(mIP);
-      if (mIP == null) return [];
+    }
+    if (addresses.isEmpty) {
+      throw const ServerException(message: 'Fail to get my IP');
+    }
+    return addresses.first;
+  }
+
+  @override
+  Future<List<Device>> getLocalDevices([bool useCachedData = true]) async {
+    if (_items.isNotEmpty && useCachedData) return _items;
+    try {
+      final mIP = await getMyIp();
       final String subnet = mIP.substring(0, mIP.lastIndexOf('.'));
-      const port = 22;
       final result = <Device>[];
-      for (var i = 0; i < 256; i++) {
+      for (int i = 2; i < 256; i++) {
+        const port = 1212;
+        final ip = '$subnet.$i';
         try {
-          final ip = '$subnet.$i';
           final socket = await Socket.connect(ip, port,
               timeout: const Duration(milliseconds: 50));
           final address =
               await InternetAddress(socket.address.address).reverse();
-          result.add(Device(name: address.address, ip: ip));
+          result.add(Device(name: address.host, ip: ip));
           socket.destroy();
         } catch (error) {
-          debugPrint(error.toString());
+          continue;
         }
       }
+      _items.addAll(result);
       return result;
     } catch (error) {
       debugPrint(error.toString());

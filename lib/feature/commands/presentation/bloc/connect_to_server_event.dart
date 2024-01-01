@@ -4,17 +4,19 @@ sealed class ConnectToServerEvent extends Equatable {
   const ConnectToServerEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 final class DoConnectToServerEvent extends ConnectToServerEvent {
   final User user;
+  final NetworkDevice? server;
   const DoConnectToServerEvent({
     required this.user,
+    required this.server,
   });
 
   @override
-  List<Object> get props => [user];
+  List<Object?> get props => [user, server];
 }
 
 final class SendMessageToServerEvent extends ConnectToServerEvent {

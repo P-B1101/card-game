@@ -1,3 +1,4 @@
+import 'package:card_game/feature/commands/domain/entity/network_device.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
@@ -16,15 +17,17 @@ class ConnectToServer extends UseCase<Stream<ServerMessage>, Params> {
 
   @override
   Future<Either<Failure, Stream<ServerMessage>>> call(Params param) =>
-      repository.connectToServer(param.user);
+      repository.connectToServer(param.user, param.server);
 }
 
 class Params extends NoParams {
   final User user;
+  final NetworkDevice? server;
   const Params({
     required this.user,
+    required this.server,
   });
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [user, server];
 }
