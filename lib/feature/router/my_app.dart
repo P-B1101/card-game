@@ -10,6 +10,7 @@ import '../../core/utils/extensions.dart';
 import '../../injectable_container.dart';
 import '../database/presentation/cubit/username_cubit.dart';
 import '../language/manager/localizatios.dart';
+import '../user/presentation/widget/username_widget.dart';
 import 'app_router.dart';
 
 class MyApp extends StatelessWidget {
@@ -60,7 +61,7 @@ class MyApp extends StatelessWidget {
                 textScaler: TextScaler.linear(scaleFactor),
                 boldText: false,
               ),
-              child: MoveWindow(child: child!),
+              child: MoveWindow(child: UsernameWidget(child: child!)),
             ),
           );
         },
