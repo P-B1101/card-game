@@ -27,4 +27,6 @@ abstract class CommandsRepository {
   Future<Either<Failure, Stream<List<NetworkDevice>>>> getPlayers();
 
   Stream<bool> listenForServerConnection();
+
+  Future<Either<Failure,void>> setReady();
 }

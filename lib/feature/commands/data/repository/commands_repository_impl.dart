@@ -1,3 +1,4 @@
+import 'package:card_game/core/manager/network_manager.dart';
 import 'package:card_game/feature/commands/domain/entity/network_device.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
@@ -13,10 +14,12 @@ import '../data_source/commands_data_source.dart';
 class CommandsRepositoryImpl implements CommandsRepository {
   final CommandsDataSource dataSource;
   final RepositoryHelper repositoryHelper;
+  final NetworkManager networkManager;
 
   const CommandsRepositoryImpl({
     required this.dataSource,
     required this.repositoryHelper,
+    required this.networkManager,
   });
 
   @override
@@ -45,7 +48,7 @@ class CommandsRepositoryImpl implements CommandsRepository {
     required String message,
   }) =>
       repositoryHelper.tryToLoad(
-          () => dataSource.sendMessage(user: user, message: message));
+          () async => dataSource.sendMessage(user: user, message: message));
 
   @override
   Future<Either<Failure, List<NetworkDevice>>> getServers(bool useCachedData) =>
@@ -58,4 +61,12 @@ class CommandsRepositoryImpl implements CommandsRepository {
   @override
   Stream<bool> listenForServerConnection() =>
       dataSource.listenForServerConnection();
+
+  @override
+  Future<Either<Failure, void>> setReady() => repositoryHelper.tryToLoad(
+        () async {
+          final ip = await networkManager.getMyIp();
+          return dataSource.setReady(ip);
+        },
+      );
 }

@@ -27,10 +27,12 @@ abstract class CommandsDataSource {
 
   Future<void> disconnectFromServer(User user);
 
-  Future<void> sendMessage({
+  void sendMessage({
     required User user,
     required String message,
   });
+
+  void setReady(String ip);
 
   Future<List<NetworkDevice>> getServers(bool useCachedData);
 
@@ -57,6 +59,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   static const _leaveLobby = 'lve-lby';
   static const _joinLobby = 'jn-lby';
   static const _serverDC = 'srv-dc';
+  static const _setReady = 'rdy';
 
   void _sendClientMessage(String? message, [String? event]) =>
       clientSocket?.emit(event ?? _serverMessage,
@@ -112,6 +115,13 @@ class CommandsDataSourceImpl implements CommandsDataSource {
         clientSocket?.close();
         clientSocket = null;
       });
+      server.on(_setReady, (data) {
+        if (data is! List) return;
+        final ip = _readMessage(data.map((e) => e as int).toList());
+        _items.toggleReadyWhere(ip);
+        server.broadcast.emit(_serverList, _listMessage);
+        server.emit(_serverList, _listMessage);
+      });
     });
     await server.listen(1212);
   }
@@ -161,10 +171,10 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   }
 
   @override
-  Future<void> sendMessage({
+  void sendMessage({
     required User user,
     required String message,
-  }) async {
+  }) {
     final serverMessage = ServerMessageModel.message(user.username, message);
     _sendClientMessage(json.encode(serverMessage.toJson));
   }
@@ -216,4 +226,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
     });
     yield* controller.stream;
   }
+
+  @override
+  void setReady(String ip) => _sendClientMessage(ip, _setReady);
 }

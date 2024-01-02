@@ -105,6 +105,7 @@ extension GetItInjectableX on _i1.GetIt {
     gh.lazySingleton<_i15.CommandsRepository>(() => _i16.CommandsRepositoryImpl(
           dataSource: gh<_i7.CommandsDataSource>(),
           repositoryHelper: gh<_i12.RepositoryHelper>(),
+          networkManager: gh<_i4.NetworkManager>(),
         ));
     gh.lazySingleton<_i17.ConnectToServer>(
         () => _i17.ConnectToServer(repository: gh<_i15.CommandsRepository>()));

@@ -83,6 +83,12 @@ extension NetworkDeviceListExt on List<NetworkDevice> {
     add(item);
   }
 
+  void toggleReadyWhere(String ip) {
+    final items = map((e) => e.ip == ip ? e.toggleReady() : e);
+    clear();
+    addAll(items);
+  }
+
   void removeIfExist(String id) {
     for (int i = 0; i < length; i++) {
       if (this[i].id == id) {
