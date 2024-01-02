@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -119,7 +118,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   @override
   Future<void> closeServer(User user) async {
     final nsp = server.of('/card-game');
-    nsp.server.emit(_serverDC, null);
+    nsp.emit(_serverDC, null);
     await nsp.server.close();
   }
 
