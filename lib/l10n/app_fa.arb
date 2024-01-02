@@ -18,5 +18,8 @@
     "ip_label": "آی پی",
     "ok_label": "باشه",
     "server_disconnected_title": "ارتباط با سرور",
-    "server_disconnected_description": "ارتباط با سرور قطع شد :("
+    "server_disconnected_description": "ارتباط با سرور قطع شد :(",
+    "start_label": "شروع بازی",
+    "ready_label": "آماده ام",
+    "im_server_label": "سرور منم :)"
 }

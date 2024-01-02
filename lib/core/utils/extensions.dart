@@ -67,6 +67,15 @@ extension MenuItemExt on MenuItem {
 }
 
 extension NetworkDeviceListExt on List<NetworkDevice> {
+  bool get is3PlayerReady {
+    int counter = 0;
+    for (int i = 0; i < length; i++) {
+      if (!this[i].isServer && this[i].isReady) counter++;
+      if (counter >= 3) return true;
+    }
+    return false;
+  }
+
   void addIfNotExist(NetworkDevice item) {
     for (int i = 0; i < length; i++) {
       if (this[i].id == item.id) return;

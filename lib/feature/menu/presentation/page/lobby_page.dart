@@ -71,19 +71,12 @@ class __LobbyPageState extends State<_LobbyPage> {
           listener: (context, state) => _handleConnectToServerState(state),
         ),
       ],
-      child: const Scaffold(
-        backgroundColor: MColors.ebony,
+      child: Scaffold(
+        backgroundColor: MColors.secondaryColor,
         body: Row(
           children: [
-            UserListWidget(),
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(child: SizedBox()),
-                  MessageBoxWidget(),
-                ],
-              ),
-            ),
+            UserListWidget(isServer: _isServer),
+            const Expanded(child: MessageBoxWidget()),
           ],
         ),
       ),

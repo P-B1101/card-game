@@ -24,6 +24,7 @@ class MButtonWidget extends StatelessWidget {
   final bool isUnderline;
   final double? loadingStroke;
   final double? loadingSize;
+  final BorderRadius? borderRadius;
   const MButtonWidget({
     super.key,
     required this.onClick,
@@ -44,6 +45,7 @@ class MButtonWidget extends StatelessWidget {
     this.textSize = 16,
     this.loadingStroke,
     this.loadingSize,
+    this.borderRadius,
   });
 
   factory MButtonWidget.outline({
@@ -57,6 +59,7 @@ class MButtonWidget extends StatelessWidget {
     double? width,
     double textSize = 16,
     double? height = 48,
+    BorderRadius? borderRadius,
   }) =>
       MButtonWidget(
         onClick: onClick,
@@ -70,6 +73,7 @@ class MButtonWidget extends StatelessWidget {
         padding: padding,
         textSize: textSize,
         height: height,
+        borderRadius: borderRadius,
       );
 
   factory MButtonWidget.text({
@@ -137,7 +141,7 @@ class MButtonWidget extends StatelessWidget {
           }
         }(),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: borderRadius ?? BorderRadius.circular(8),
           color: () {
             switch (type) {
               case ButtonType.fill:
@@ -166,7 +170,7 @@ class MButtonWidget extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: borderRadius ?? BorderRadius.circular(8),
             onTap: _canClick ? onClick : null,
             child: () {
               switch (type) {

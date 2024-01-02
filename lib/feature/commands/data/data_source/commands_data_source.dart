@@ -143,6 +143,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
       name: user.username,
       ip: user.ip,
       isServer: server == null,
+      isReady: server == null,
+      serverIp: server?.ip ?? user.ip,
     );
     _sendClientMessage(json.encode(device.toJson), _joinLobby);
     final serverMessage = ServerMessageModel.hello(user.username);
@@ -177,6 +179,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
         ip: items[i].ip,
         name: items[i].name,
         isServer: true,
+        isReady: true,
+        serverIp: items[i].ip,
       );
       result.add(device);
     }

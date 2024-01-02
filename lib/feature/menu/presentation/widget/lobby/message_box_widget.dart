@@ -34,7 +34,7 @@ class _MessageBoxWidgetState extends State<MessageBoxWidget> {
   Widget build(BuildContext context) {
     return BlocBuilder<CreateServerBloc, CreateServerState>(
       builder: (context, state) => Container(
-        height: 200,
+        // height: 200,
         width: double.infinity,
         decoration: const BoxDecoration(
           color: MColors.secondaryColor,
@@ -66,9 +66,11 @@ class _MessageBoxWidgetState extends State<MessageBoxWidget> {
               ),
             ),
             Container(
-              height: 56,
+              height: 64,
               width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 16),
+              color: MColors.secondaryColor,
+              alignment: Alignment.center,
               child: MInputWidget(
                 controller: _controller,
                 focusNode: _focusNode,
