@@ -148,8 +148,13 @@ class __LobbyPageState extends State<_LobbyPage> {
     }
   }
 
+  void showServerDisconnectedDialog() async {
+    await DialogManager.instance.showServerDisconnectedDialog(context);
+    if (!mounted) return;
+    context.navigateTo(const MenuRoute());
+  }
+
   void _handleConnectToServerState(ConnectToServerState state) {
-    debugPrint(state.toString());
     if (state is ConnectToServerSuccess && state.item != null) {
       context
           .read<CreateServerBloc>()
@@ -157,7 +162,7 @@ class __LobbyPageState extends State<_LobbyPage> {
       context.read<PlayersBloc>().add(GetPlayersEvent());
     }
     if (state is DisconnectFromServerState) {
-      context.navigateTo(const MenuRoute());
+      showServerDisconnectedDialog();
     }
   }
 

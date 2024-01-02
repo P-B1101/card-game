@@ -15,5 +15,8 @@
     "user_name_error": "وارد کردن نام کاربری الزامی است",
     "save_label": "ذخیره",
     "name_label": "نام",
-    "ip_label": "آی پی"
+    "ip_label": "آی پی",
+    "ok_label": "باشه",
+    "server_disconnected_title": "ارتباط با سرور",
+    "server_disconnected_description": "ارتباط با سرور قطع شد :("
 }

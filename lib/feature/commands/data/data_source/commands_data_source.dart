@@ -46,8 +46,6 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   final List<NetworkDevice> _items = [];
   socket_io.Socket? clientSocket;
 
-  StreamController<bool>? _serverConnectionController;
-
   CommandsDataSourceImpl({
     required this.server,
     required this.networkManager,
@@ -84,7 +82,6 @@ class CommandsDataSourceImpl implements CommandsDataSource {
     final nsp = server.of('/card-game');
     nsp.on('connection', (server) {
       if (server is! Socket) return;
-      _serverConnectionController = StreamController<bool>();
       server.emit(_serverList, _listMessage);
       server.on(_serverMessage, (data) {
         server.broadcast.emit(_clientMessage, data);
@@ -202,14 +199,12 @@ class CommandsDataSourceImpl implements CommandsDataSource {
 
   @override
   Stream<bool> listenForServerConnection() async* {
+    final controller = StreamController<bool>();
     clientSocket?.on(_serverDC, (_) {
-      debugPrint('disconnected!');
-      if (!(_serverConnectionController?.isClosed ?? true)) return;
-      _serverConnectionController?.add(true);
-      _serverConnectionController?.close();
-      _serverConnectionController = null;
+      if (controller.isClosed) return;
+      controller.add(true);
+      controller.close();
     });
-    if (_serverConnectionController == null) return;
-    yield* _serverConnectionController!.stream;
+    yield* controller.stream;
   }
 }
