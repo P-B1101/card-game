@@ -57,9 +57,10 @@ class ConnectToServerBloc
       (failure) async => failure.toState,
       (response) async {
         _messageSub = response.listen((event) {
-          add(AddMessageFromServerEvent(item: event));
+          if (!isClosed) add(AddMessageFromServerEvent(item: event));
         });
         _connectionSub = _listenForserverConnection().listen((event) {
+          if (isClosed) return;
           if (event) _user = null;
           if (event) add(DisconnectFromServerEvent());
         });
