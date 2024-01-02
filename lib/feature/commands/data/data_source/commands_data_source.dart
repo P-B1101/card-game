@@ -59,6 +59,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   static const _clientMessage = 'clt-msg';
   static const _leaveLobby = 'lve-lby';
   static const _joinLobby = 'jn-lby';
+  static const _serverDC = 'srv-dc';
 
   void _sendClientMessage(String message, [String? event]) =>
       clientSocket?.emit(event ?? _serverMessage, utf8.encode(message));
@@ -107,14 +108,18 @@ class CommandsDataSourceImpl implements CommandsDataSource {
         server.broadcast.emit(_serverList, _listMessage);
         server.emit(_serverList, _listMessage);
       });
+      server.on(_serverDC, (data) {
+        server.broadcast.emit(_serverDC, null);
+        server.emit(_serverDC, null);
+      });
     });
     await server.listen(1212);
   }
 
   @override
   Future<void> closeServer(User user) async {
-    // _serverSocket = null;
     final nsp = server.of('/card-game');
+    nsp.server.emit(_serverDC, null);
     await nsp.server.close();
   }
 
@@ -195,14 +200,13 @@ class CommandsDataSourceImpl implements CommandsDataSource {
 
   @override
   Stream<bool> listenForServerConnection() async* {
-    // final nsp = server.of('/card-game');
-    // nsp.on('disconnect', (_) {
-    //   debugPrint('disconnected!');
-    //   if (!(_serverConnectionController?.isClosed ?? true)) return;
-    //   _serverConnectionController?.add(true);
-    //   _serverConnectionController?.close();
-    //   _serverConnectionController = null;
-    // });
+    clientSocket?.on(_serverDC, (_) {
+      debugPrint('disconnected!');
+      if (!(_serverConnectionController?.isClosed ?? true)) return;
+      _serverConnectionController?.add(true);
+      _serverConnectionController?.close();
+      _serverConnectionController = null;
+    });
     if (_serverConnectionController == null) return;
     yield* _serverConnectionController!.stream;
   }
