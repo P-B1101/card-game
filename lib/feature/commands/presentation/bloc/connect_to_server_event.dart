@@ -41,3 +41,6 @@ final class AddMessageFromServerEvent extends ConnectToServerEvent {
 }
 
 final class DisconnectFromServerEvent extends ConnectToServerEvent {}
+
+
+final class SetReadyEvent extends ConnectToServerEvent {}

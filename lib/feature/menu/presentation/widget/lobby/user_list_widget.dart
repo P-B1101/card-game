@@ -1,11 +1,12 @@
-import 'package:card_game/core/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/components/button/m_button.dart';
 import '../../../../../core/utils/assets.dart';
 import '../../../../../core/utils/extensions.dart';
+import '../../../../../core/utils/utils.dart';
 import '../../../../commands/domain/entity/network_device.dart';
+import '../../../../commands/presentation/bloc/connect_to_server_bloc.dart';
 import '../../../../commands/presentation/bloc/players_bloc.dart';
 import '../../../../database/presentation/cubit/username_cubit.dart';
 import '../../../../language/manager/localizatios.dart';
@@ -43,7 +44,7 @@ class UserListWidget extends StatelessWidget {
                 sizeCurve: UiUtils.curve,
                 firstCurve: UiUtils.curve,
                 secondCurve: UiUtils.curve,
-                crossFadeState: isServer && !state.items.is3PlayerReady
+                crossFadeState: isServer || !state.items.is3PlayerReady
                     ? CrossFadeState.showFirst
                     : CrossFadeState.showSecond,
                 firstChild: MButtonWidget(
@@ -51,7 +52,11 @@ class UserListWidget extends StatelessWidget {
                   color: MColors.keppel,
                   enableClickWhenDisable: false,
                   onClick: () {
-                    // TODO: implement start gage
+                    if (isServer) {
+                      // TODO: implement start game.
+                      return;
+                    }
+                    context.read<ConnectToServerBloc>().add(SetReadyEvent());
                   },
                   isEnable: isServer ? state.items.is3PlayerReady : true,
                   title: isServer

@@ -16,7 +16,7 @@ import 'package:card_game/feature/commands/data/repository/commands_repository_i
 import 'package:card_game/feature/commands/domain/repository/commands_repository.dart'
     as _i15;
 import 'package:card_game/feature/commands/domain/use_case/close_server.dart'
-    as _i26;
+    as _i27;
 import 'package:card_game/feature/commands/domain/use_case/connect_to_server.dart'
     as _i17;
 import 'package:card_game/feature/commands/domain/use_case/create_server.dart'
@@ -31,10 +31,12 @@ import 'package:card_game/feature/commands/domain/use_case/listen_for_server_con
     as _i22;
 import 'package:card_game/feature/commands/domain/use_case/send_message.dart'
     as _i25;
+import 'package:card_game/feature/commands/domain/use_case/set_ready.dart'
+    as _i26;
 import 'package:card_game/feature/commands/presentation/bloc/connect_to_server_bloc.dart'
-    as _i27;
-import 'package:card_game/feature/commands/presentation/bloc/create_server_bloc.dart'
     as _i28;
+import 'package:card_game/feature/commands/presentation/bloc/create_server_bloc.dart'
+    as _i29;
 import 'package:card_game/feature/commands/presentation/bloc/network_device_bloc.dart'
     as _i23;
 import 'package:card_game/feature/commands/presentation/bloc/players_bloc.dart'
@@ -53,7 +55,7 @@ import 'package:card_game/feature/database/presentation/cubit/username_cubit.dar
     as _i14;
 import 'package:card_game/feature/repository_manager/repository_manager.dart'
     as _i12;
-import 'package:card_game/injectable_container.dart' as _i29;
+import 'package:card_game/injectable_container.dart' as _i30;
 import 'package:fluttertoast/fluttertoast.dart' as _i3;
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart' as _i2;
@@ -125,24 +127,27 @@ extension GetItInjectableX on _i1.GetIt {
     gh.factory<_i24.PlayersBloc>(() => _i24.PlayersBloc(gh<_i20.GetPlayers>()));
     gh.lazySingleton<_i25.SendMessage>(
         () => _i25.SendMessage(repository: gh<_i15.CommandsRepository>()));
-    gh.lazySingleton<_i26.CloseServer>(
-        () => _i26.CloseServer(repository: gh<_i15.CommandsRepository>()));
-    gh.factory<_i27.ConnectToServerBloc>(() => _i27.ConnectToServerBloc(
+    gh.lazySingleton<_i26.SetReady>(
+        () => _i26.SetReady(repository: gh<_i15.CommandsRepository>()));
+    gh.lazySingleton<_i27.CloseServer>(
+        () => _i27.CloseServer(repository: gh<_i15.CommandsRepository>()));
+    gh.factory<_i28.ConnectToServerBloc>(() => _i28.ConnectToServerBloc(
           gh<_i17.ConnectToServer>(),
           gh<_i25.SendMessage>(),
           gh<_i19.DisconnectFromServer>(),
           gh<_i22.ListenForserverConnection>(),
+          gh<_i26.SetReady>(),
         ));
-    gh.factory<_i28.CreateServerBloc>(() => _i28.CreateServerBloc(
+    gh.factory<_i29.CreateServerBloc>(() => _i29.CreateServerBloc(
           gh<_i18.CreateServer>(),
-          gh<_i26.CloseServer>(),
+          gh<_i27.CloseServer>(),
         ));
     return this;
   }
 }
 
-class _$RegisterFToast extends _i29.RegisterFToast {}
+class _$RegisterFToast extends _i30.RegisterFToast {}
 
-class _$RegisterServer extends _i29.RegisterServer {}
+class _$RegisterServer extends _i30.RegisterServer {}
 
-class _$RegisterSharedPref extends _i29.RegisterSharedPref {}
+class _$RegisterSharedPref extends _i30.RegisterSharedPref {}
