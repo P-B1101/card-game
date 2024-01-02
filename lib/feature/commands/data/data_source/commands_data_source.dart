@@ -138,8 +138,12 @@ class CommandsDataSourceImpl implements CommandsDataSource {
       if (controller.isClosed) return;
       controller.add(ServerMessageModel.fromJson(body));
     });
-    final device =
-        NetworkDeviceModel(id: user.ip, name: user.username, ip: user.ip);
+    final device = NetworkDeviceModel(
+      id: user.ip,
+      name: user.username,
+      ip: user.ip,
+      isServer: server == null,
+    );
     _sendClientMessage(json.encode(device.toJson), _joinLobby);
     final serverMessage = ServerMessageModel.hello(user.username);
     _sendClientMessage(json.encode(serverMessage.toJson));
@@ -172,6 +176,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
         id: items[i].ip,
         ip: items[i].ip,
         name: items[i].name,
+        isServer: true,
       );
       result.add(device);
     }

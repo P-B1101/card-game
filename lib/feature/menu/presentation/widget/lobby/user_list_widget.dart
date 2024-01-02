@@ -16,14 +16,20 @@ class UserListWidget extends StatelessWidget {
           width: 200,
           height: double.infinity,
           color: MColors.bole,
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            itemBuilder: (context, index) => _ItemWidget(
-              name: state.items[index].name,
-              isMe: state.items[index].ip == uState.user.ip,
-            ),
-            itemCount: state.items.length,
-            shrinkWrap: true,
+          child: Column(
+            children: [
+              Flexible(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  itemBuilder: (context, index) => _ItemWidget(
+                    name: state.items[index].name,
+                    isMe: state.items[index].ip == uState.user.ip,
+                  ),
+                  itemCount: state.items.length,
+                  shrinkWrap: true,
+                ),
+              ),
+            ],
           ),
         ),
       ),
