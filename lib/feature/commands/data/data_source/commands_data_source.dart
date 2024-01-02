@@ -114,9 +114,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   @override
   Future<void> closeServer(User user) async {
     // _serverSocket = null;
-    await server.close();
-    _serverConnectionController?.close();
-    _serverConnectionController = null;
+    final nsp = server.of('/card-game');
+    await nsp.server.close();
   }
 
   @override
@@ -196,11 +195,14 @@ class CommandsDataSourceImpl implements CommandsDataSource {
 
   @override
   Stream<bool> listenForServerConnection() async* {
-    server.on('disconnect', (_) {
-      debugPrint('disconnected!');
-      if (!(_serverConnectionController?.isClosed ?? true)) return;
-      _serverConnectionController?.add(true);
-    });
+    // final nsp = server.of('/card-game');
+    // nsp.on('disconnect', (_) {
+    //   debugPrint('disconnected!');
+    //   if (!(_serverConnectionController?.isClosed ?? true)) return;
+    //   _serverConnectionController?.add(true);
+    //   _serverConnectionController?.close();
+    //   _serverConnectionController = null;
+    // });
     if (_serverConnectionController == null) return;
     yield* _serverConnectionController!.stream;
   }
