@@ -16,7 +16,7 @@ import 'package:card_game/feature/commands/data/repository/commands_repository_i
 import 'package:card_game/feature/commands/domain/repository/commands_repository.dart'
     as _i15;
 import 'package:card_game/feature/commands/domain/use_case/close_server.dart'
-    as _i25;
+    as _i26;
 import 'package:card_game/feature/commands/domain/use_case/connect_to_server.dart'
     as _i17;
 import 'package:card_game/feature/commands/domain/use_case/create_server.dart'
@@ -27,16 +27,18 @@ import 'package:card_game/feature/commands/domain/use_case/get_players.dart'
     as _i20;
 import 'package:card_game/feature/commands/domain/use_case/get_servers.dart'
     as _i21;
-import 'package:card_game/feature/commands/domain/use_case/send_message.dart'
-    as _i24;
-import 'package:card_game/feature/commands/presentation/bloc/connect_to_server_bloc.dart'
-    as _i26;
-import 'package:card_game/feature/commands/presentation/bloc/create_server_bloc.dart'
-    as _i27;
-import 'package:card_game/feature/commands/presentation/bloc/network_device_bloc.dart'
+import 'package:card_game/feature/commands/domain/use_case/listen_for_server_connection.dart'
     as _i22;
-import 'package:card_game/feature/commands/presentation/bloc/players_bloc.dart'
+import 'package:card_game/feature/commands/domain/use_case/send_message.dart'
+    as _i25;
+import 'package:card_game/feature/commands/presentation/bloc/connect_to_server_bloc.dart'
+    as _i27;
+import 'package:card_game/feature/commands/presentation/bloc/create_server_bloc.dart'
+    as _i28;
+import 'package:card_game/feature/commands/presentation/bloc/network_device_bloc.dart'
     as _i23;
+import 'package:card_game/feature/commands/presentation/bloc/players_bloc.dart'
+    as _i24;
 import 'package:card_game/feature/database/data/data_source/database_data_source.dart'
     as _i8;
 import 'package:card_game/feature/database/data/repository/database_repository_impl.dart'
@@ -51,7 +53,7 @@ import 'package:card_game/feature/database/presentation/cubit/username_cubit.dar
     as _i14;
 import 'package:card_game/feature/repository_manager/repository_manager.dart'
     as _i12;
-import 'package:card_game/injectable_container.dart' as _i28;
+import 'package:card_game/injectable_container.dart' as _i29;
 import 'package:fluttertoast/fluttertoast.dart' as _i3;
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart' as _i2;
@@ -114,28 +116,32 @@ extension GetItInjectableX on _i1.GetIt {
         () => _i20.GetPlayers(repository: gh<_i15.CommandsRepository>()));
     gh.lazySingleton<_i21.GetServers>(
         () => _i21.GetServers(repository: gh<_i15.CommandsRepository>()));
-    gh.factory<_i22.NetworkDeviceBloc>(
-        () => _i22.NetworkDeviceBloc(gh<_i21.GetServers>()));
-    gh.factory<_i23.PlayersBloc>(() => _i23.PlayersBloc(gh<_i20.GetPlayers>()));
-    gh.lazySingleton<_i24.SendMessage>(
-        () => _i24.SendMessage(repository: gh<_i15.CommandsRepository>()));
-    gh.lazySingleton<_i25.CloseServer>(
-        () => _i25.CloseServer(repository: gh<_i15.CommandsRepository>()));
-    gh.factory<_i26.ConnectToServerBloc>(() => _i26.ConnectToServerBloc(
+    gh.lazySingleton<_i22.ListenForserverConnection>(() =>
+        _i22.ListenForserverConnection(
+            repository: gh<_i15.CommandsRepository>()));
+    gh.factory<_i23.NetworkDeviceBloc>(
+        () => _i23.NetworkDeviceBloc(gh<_i21.GetServers>()));
+    gh.factory<_i24.PlayersBloc>(() => _i24.PlayersBloc(gh<_i20.GetPlayers>()));
+    gh.lazySingleton<_i25.SendMessage>(
+        () => _i25.SendMessage(repository: gh<_i15.CommandsRepository>()));
+    gh.lazySingleton<_i26.CloseServer>(
+        () => _i26.CloseServer(repository: gh<_i15.CommandsRepository>()));
+    gh.factory<_i27.ConnectToServerBloc>(() => _i27.ConnectToServerBloc(
           gh<_i17.ConnectToServer>(),
-          gh<_i24.SendMessage>(),
+          gh<_i25.SendMessage>(),
           gh<_i19.DisconnectFromServer>(),
+          gh<_i22.ListenForserverConnection>(),
         ));
-    gh.factory<_i27.CreateServerBloc>(() => _i27.CreateServerBloc(
+    gh.factory<_i28.CreateServerBloc>(() => _i28.CreateServerBloc(
           gh<_i18.CreateServer>(),
-          gh<_i25.CloseServer>(),
+          gh<_i26.CloseServer>(),
         ));
     return this;
   }
 }
 
-class _$RegisterFToast extends _i28.RegisterFToast {}
+class _$RegisterFToast extends _i29.RegisterFToast {}
 
-class _$RegisterServer extends _i28.RegisterServer {}
+class _$RegisterServer extends _i29.RegisterServer {}
 
-class _$RegisterSharedPref extends _i28.RegisterSharedPref {}
+class _$RegisterSharedPref extends _i29.RegisterSharedPref {}

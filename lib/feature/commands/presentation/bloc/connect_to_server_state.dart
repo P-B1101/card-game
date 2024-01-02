@@ -22,3 +22,6 @@ final class ConnectToServerSuccess extends ConnectToServerState {
 }
 
 final class ConnectToServerFailure extends ConnectToServerState {}
+
+
+final class DisconnectFromServerState extends ConnectToServerState {}

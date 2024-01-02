@@ -39,3 +39,5 @@ final class AddMessageFromServerEvent extends ConnectToServerEvent {
   @override
   List<Object> get props => [item];
 }
+
+final class DisconnectFromServerEvent extends ConnectToServerEvent {}

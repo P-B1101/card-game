@@ -25,4 +25,6 @@ abstract class CommandsRepository {
   Future<Either<Failure, List<NetworkDevice>>> getServers(bool useCachedData);
 
   Future<Either<Failure, Stream<List<NetworkDevice>>>> getPlayers();
+
+  Stream<bool> listenForServerConnection();
 }

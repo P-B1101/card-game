@@ -54,4 +54,8 @@ class CommandsRepositoryImpl implements CommandsRepository {
   @override
   Future<Either<Failure, Stream<List<NetworkDevice>>>> getPlayers() =>
       repositoryHelper.tryToLoad(() => dataSource.getPlayers());
+
+  @override
+  Stream<bool> listenForServerConnection() =>
+      dataSource.listenForServerConnection();
 }

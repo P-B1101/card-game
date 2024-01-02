@@ -1,10 +1,10 @@
 import 'package:animation_wrappers/animations/faded_slide_animation.dart';
-import 'package:card_game/core/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/components/input/m_input_widget.dart';
 import '../../../../../core/utils/assets.dart';
+import '../../../../../core/utils/enum.dart';
 import '../../../../../core/utils/utils.dart';
 import '../../../../commands/domain/entity/server_message.dart';
 import '../../../../commands/presentation/bloc/connect_to_server_bloc.dart';
@@ -68,24 +68,12 @@ class _MessageBoxWidgetState extends State<MessageBoxWidget> {
             Container(
               height: 56,
               width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: 8),
-                  _sendButtonWidget,
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: MInputWidget(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      hint: Strings.of(context).send_message_hint,
-                      onSubmit: (value) => _sendMessage(),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              child: MInputWidget(
+                controller: _controller,
+                focusNode: _focusNode,
+                hint: Strings.of(context).send_message_hint,
+                onSubmit: (value) => _sendMessage(),
               ),
             ),
           ],
@@ -93,32 +81,6 @@ class _MessageBoxWidgetState extends State<MessageBoxWidget> {
       ),
     );
   }
-
-  Widget get _sendButtonWidget => Builder(
-        builder: (context) => Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: MColors.primaryColor,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: _sendMessage,
-              borderRadius: BorderRadius.circular(8),
-              child: const RotatedBox(
-                quarterTurns: 2,
-                child: Icon(
-                  Icons.send_rounded,
-                  size: 28,
-                  color: MColors.whiteColor,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
 
   void _sendMessage() {
     if (_controller.text.isEmpty) return;
@@ -163,6 +125,7 @@ class _MessageItemWidget extends StatelessWidget {
               ),
             )
           : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '${message.user}: ',
@@ -173,13 +136,18 @@ class _MessageItemWidget extends StatelessWidget {
                     color: isMe ? MColors.seeGreen : MColors.ecru,
                   ),
                 ),
-                Text(
-                  message.message,
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: Fonts.light300,
-                    color: MColors.whiteColor.withOpacity(.9),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      message.message,
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: Fonts.light300,
+                        color: MColors.whiteColor.withOpacity(.9),
+                      ),
+                    ),
                   ),
                 )
               ],

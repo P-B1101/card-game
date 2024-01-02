@@ -149,11 +149,15 @@ class __LobbyPageState extends State<_LobbyPage> {
   }
 
   void _handleConnectToServerState(ConnectToServerState state) {
+    debugPrint(state.toString());
     if (state is ConnectToServerSuccess && state.item != null) {
       context
           .read<CreateServerBloc>()
           .add(AddMessageEvent(message: state.item!));
       context.read<PlayersBloc>().add(GetPlayersEvent());
+    }
+    if (state is DisconnectFromServerState) {
+      context.navigateTo(const MenuRoute());
     }
   }
 

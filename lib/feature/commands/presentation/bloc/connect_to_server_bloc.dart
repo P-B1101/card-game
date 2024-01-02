@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:card_game/feature/commands/domain/use_case/listen_for_server_connection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
@@ -22,10 +23,12 @@ class ConnectToServerBloc
   final ConnectToServer _connectToServer;
   final send.SendMessage _sendMessage;
   final dc.DisconnectFromServer _disconnectFromServer;
+  final ListenForserverConnection _listenForserverConnection;
   ConnectToServerBloc(
     this._connectToServer,
     this._sendMessage,
     this._disconnectFromServer,
+    this._listenForserverConnection,
   ) : super(ConnectToServerInitial()) {
     on<DoConnectToServerEvent>(
       _onDoConnectToServerEvent,
@@ -36,8 +39,10 @@ class ConnectToServerBloc
       transformer: droppable(),
     );
     on<AddMessageFromServerEvent>(_onAddMessageFromServerEvent);
+    on<DisconnectFromServerEvent>(_onDisconnectFromServerEvent);
   }
-  StreamSubscription? _sub;
+  StreamSubscription? _messageSub;
+  StreamSubscription? _connectionSub;
   User? _user;
 
   Future<void> _onDoConnectToServerEvent(
@@ -51,8 +56,12 @@ class ConnectToServerBloc
     final newState = await result.fold(
       (failure) async => failure.toState,
       (response) async {
-        _sub = response.listen((event) {
+        _messageSub = response.listen((event) {
           add(AddMessageFromServerEvent(item: event));
+        });
+        _connectionSub = _listenForserverConnection().listen((event) {
+          if (event) _user = null;
+          if (event) add(DisconnectFromServerEvent());
         });
         return const ConnectToServerSuccess();
       },
@@ -80,11 +89,25 @@ class ConnectToServerBloc
     emit(ConnectToServerSuccess(item: event.item));
   }
 
+  Future<void> _onDisconnectFromServerEvent(
+    DisconnectFromServerEvent event,
+    Emitter<ConnectToServerState> emit,
+  ) async {
+    emit(DisconnectFromServerState());
+  }
+
   @override
   Future<void> close() {
-    _sub?.cancel();
+    _closeConnection();
     if (_user != null) _disconnectFromServer(dc.Params(user: _user!));
     return super.close();
+  }
+
+  void _closeConnection() {
+    _messageSub?.cancel();
+    _messageSub = null;
+    _connectionSub?.cancel();
+    _connectionSub = null;
   }
 }
 

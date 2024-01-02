@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:card_game/feature/user/data/model/user_model.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:socket_io/socket_io.dart';
 import 'package:socket_io_client/socket_io_client.dart' as socket_io;
 
 import '../../../../core/manager/network_manager.dart';
 import '../../../../core/utils/extensions.dart';
+import '../../../user/data/model/user_model.dart';
 import '../../../user/domain/entity/user.dart';
 import '../../domain/entity/network_device.dart';
 import '../../domain/entity/server_message.dart';
@@ -36,6 +36,8 @@ abstract class CommandsDataSource {
   Future<List<NetworkDevice>> getServers(bool useCachedData);
 
   Future<Stream<List<NetworkDevice>>> getPlayers();
+
+  Stream<bool> listenForServerConnection();
 }
 
 @LazySingleton(as: CommandsDataSource)
@@ -44,12 +46,12 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   final NetworkManager networkManager;
   final List<NetworkDevice> _items = [];
   socket_io.Socket? clientSocket;
-  // Socket? _serverSocket;
+
+  StreamController<bool>? _serverConnectionController;
 
   CommandsDataSourceImpl({
     required this.server,
     required this.networkManager,
-    // required this.socket,
   });
 
   static const _serverList = 'server-list';
@@ -66,17 +68,21 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   Uint8List get _listMessage => utf8.encode(json.encode(
       _items.map((e) => NetworkDeviceModel.fromEntity(e).toJson).toList()));
 
+  void _connectToServer(String? ip) {
+    final host = ip ?? 'localhost';
+    final uri = 'http://$host:1212/card-game';
+    clientSocket = socket_io.io(
+      uri,
+      socket_io.OptionBuilder().setTransports(['websocket']).build(),
+    );
+  }
+
   @override
   Future<void> createServer(User user) async {
     final nsp = server.of('/card-game');
     nsp.on('connection', (server) {
       if (server is! Socket) return;
-      // _serverSocket = server;
-      // _items.addIfNotExist(NetworkDevice(
-      //   id: user.ip,
-      //   name: user.username,
-      //   ip: user.ip,
-      // ));
+      _serverConnectionController = StreamController<bool>();
       server.emit(_serverList, _listMessage);
       server.on(_serverMessage, (data) {
         server.broadcast.emit(_clientMessage, data);
@@ -109,6 +115,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   Future<void> closeServer(User user) async {
     // _serverSocket = null;
     await server.close();
+    _serverConnectionController?.close();
+    _serverConnectionController = null;
   }
 
   @override
@@ -117,13 +125,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
     NetworkDevice? server,
   ) async {
     StreamController<ServerMessage> controller = StreamController();
-    final host = server?.ip ?? 'localhost';
-    final uri = 'http://$host:1212/card-game';
-    debugPrint('try to connect to $uri ...');
-    clientSocket = socket_io.io(
-      uri,
-      socket_io.OptionBuilder().setTransports(['websocket']).build(),
-    );
+    _connectToServer(server?.ip);
     clientSocket?.on(_clientMessage, (data) {
       if (data is! List) return;
       final body =
@@ -188,9 +190,18 @@ class CommandsDataSourceImpl implements CommandsDataSource {
             .add(body.map((e) => NetworkDeviceModel.fromJson(e)).toList());
       },
     );
-    Future.delayed(const Duration(milliseconds: 500)).then((value) {
-      _sendClientMessage(_serverList, _serverList);
-    });
+    _sendClientMessage(_serverList, _serverList);
     return controller.stream;
+  }
+
+  @override
+  Stream<bool> listenForServerConnection() async* {
+    server.on('disconnect', (_) {
+      debugPrint('disconnected!');
+      if (!(_serverConnectionController?.isClosed ?? true)) return;
+      _serverConnectionController?.add(true);
+    });
+    if (_serverConnectionController == null) return;
+    yield* _serverConnectionController!.stream;
   }
 }
