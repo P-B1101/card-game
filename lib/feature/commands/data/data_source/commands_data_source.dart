@@ -60,8 +60,9 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   static const _joinLobby = 'jn-lby';
   static const _serverDC = 'srv-dc';
 
-  void _sendClientMessage(String message, [String? event]) =>
-      clientSocket?.emit(event ?? _serverMessage, utf8.encode(message));
+  void _sendClientMessage(String? message, [String? event]) =>
+      clientSocket?.emit(event ?? _serverMessage,
+          message == null ? null : utf8.encode(message));
 
   String _readMessage(List<int> bytes) => utf8.decode(bytes);
 
@@ -71,6 +72,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   void _connectToServer(String? ip) {
     final host = ip ?? 'localhost';
     final uri = 'http://$host:1212/card-game';
+    clientSocket?.close();
     clientSocket = socket_io.io(
       uri,
       socket_io.OptionBuilder().setTransports(['websocket']).build(),
@@ -110,6 +112,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
       server.on(_serverDC, (data) {
         server.broadcast.emit(_serverDC, null);
         server.emit(_serverDC, null);
+        clientSocket?.close();
+        clientSocket = null;
       });
     });
     await server.listen(1212);
@@ -117,8 +121,9 @@ class CommandsDataSourceImpl implements CommandsDataSource {
 
   @override
   Future<void> closeServer(User user) async {
+    _sendClientMessage(null, _serverDC);
+    await Future.delayed(const Duration(milliseconds: 500));
     final nsp = server.of('/card-game');
-    nsp.emit(_serverDC, null);
     await nsp.server.close();
   }
 
@@ -150,8 +155,6 @@ class CommandsDataSourceImpl implements CommandsDataSource {
         json.encode(ServerMessageModel.goodby(user.username).toJson));
     _sendClientMessage(
         json.encode(UserModel.fromEntity(user).toJson), _leaveLobby);
-    clientSocket?.disconnect();
-    clientSocket = null;
   }
 
   @override

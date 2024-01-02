@@ -32,7 +32,7 @@ class PlayersBloc extends Bloc<PlayersEvent, PlayersState> {
       },
       (response) async {
         _sub = response.listen((event) {
-          add(AddPlayersEvent(items: event));
+          if (!isClosed) add(AddPlayersEvent(items: event));
         });
       },
     );
