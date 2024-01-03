@@ -142,7 +142,7 @@ class _ItemWidget extends StatelessWidget {
                 ),
               ],
             ),
-            secondChild: const SizedBox(height: 38),
+            secondChild: const SizedBox(height: 42),
           ),
         ],
       ),
