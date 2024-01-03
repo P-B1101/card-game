@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:card_game/core/utils/enum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:socket_io/socket_io.dart';
@@ -94,7 +95,9 @@ class CommandsDataSourceImpl implements CommandsDataSource {
         if (data is! List) return;
         final body = _readMessage(data.map((e) => e as int).toList());
         final message = ServerMessageModel.fromJson(json.decode(body));
-        sembastDataSource.addMessage(message, user.ip);
+        if (message.status == ServerMessageStatus.message) {
+          sembastDataSource.addMessage(message, user.ip);
+        }
         server.broadcast.emit(_clientMessage, data);
         server.emit(_clientMessage, data);
       });
