@@ -31,7 +31,7 @@ class SembastDataSourceImpl implements SembastDataSource {
     ServerMessage message,
     String serverIp,
   ) async {
-    _initializeDb();
+    await _initializeDb();
     final items = await getMessages(serverIp);
     items.add(message);
     await store.record(serverIp).put(
@@ -42,7 +42,7 @@ class SembastDataSourceImpl implements SembastDataSource {
 
   @override
   Future<List<ServerMessage>> getMessages(String serverIp) async {
-    _initializeDb();
+    await _initializeDb();
     final value = await store.record(serverIp).get(_db!);
     if (value is! List) return [];
     return value.map((e) => ServerMessageModel.fromJson(e)).toList();
