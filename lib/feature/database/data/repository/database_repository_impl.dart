@@ -1,8 +1,8 @@
-import 'package:card_game/core/manager/network_manager.dart';
-import 'package:card_game/feature/user/domain/entity/user.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/manager/network_manager.dart';
+import '../../../user/domain/entity/user.dart';
 import '../../domain/repository/database_repository.dart';
 import '../data_source/database_data_source.dart';
 

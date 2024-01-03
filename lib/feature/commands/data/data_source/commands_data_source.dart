@@ -8,6 +8,7 @@ import 'package:socket_io_client/socket_io_client.dart' as socket_io;
 
 import '../../../../core/manager/network_manager.dart';
 import '../../../../core/utils/extensions.dart';
+import '../../../database/data/data_source/sembast_data_source.dart';
 import '../../../user/data/model/user_model.dart';
 import '../../../user/domain/entity/user.dart';
 import '../../domain/entity/network_device.dart';
@@ -45,17 +46,20 @@ abstract class CommandsDataSource {
 class CommandsDataSourceImpl implements CommandsDataSource {
   final Server server;
   final NetworkManager networkManager;
+  final SembastDataSource sembastDataSource;
   final List<NetworkDevice> _items = [];
   socket_io.Socket? clientSocket;
 
   CommandsDataSourceImpl({
     required this.server,
     required this.networkManager,
+    required this.sembastDataSource,
   });
 
   static const _serverList = 'server-list';
   static const _serverMessage = 'srv-msg';
   static const _clientMessage = 'clt-msg';
+  static const _oldClientMessage = 'old-clt-msg';
   static const _leaveLobby = 'lve-lby';
   static const _joinLobby = 'jn-lby';
   static const _serverDC = 'srv-dc';
@@ -67,7 +71,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
 
   String _readMessage(List<int> bytes) => utf8.decode(bytes);
 
-  Uint8List get _listMessage => utf8.encode(json.encode(
+  Uint8List get _usersListMessage => utf8.encode(json.encode(
       _items.map((e) => NetworkDeviceModel.fromEntity(e).toJson).toList()));
 
   void _connectToServer(String? ip) {
@@ -83,31 +87,47 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   @override
   Future<void> createServer(User user) async {
     final nsp = server.of('/card-game');
-    nsp.on('connection', (server) {
+    nsp.on('connection', (server) async {
       if (server is! Socket) return;
-      server.emit(_serverList, _listMessage);
+      server.emit(_serverList, _usersListMessage);
+      final items = await sembastDataSource.getMessages(user.ip);
+      server.emit(
+          _clientMessage,
+          utf8.encode(json.encode(items
+              .map((e) => ServerMessageModel.fromEntity(e).toJson)
+              .toList())));
       server.on(_serverMessage, (data) {
+        if (data is! List) return;
+        final body = _readMessage(data.map((e) => e as int).toList());
+        final message = ServerMessageModel.fromJson(json.decode(body));
+        sembastDataSource.addMessage(message, user.ip);
         server.broadcast.emit(_clientMessage, data);
         server.emit(_clientMessage, data);
       });
       server.on(_serverList, (data) {
-        server.broadcast.emit(_serverList, _listMessage);
-        server.emit(_serverList, _listMessage);
+        server.broadcast.emit(_serverList, _usersListMessage);
+        server.emit(_serverList, _usersListMessage);
       });
       server.on(_leaveLobby, (data) {
         if (data is! List) return;
         final body = _readMessage(data.map((e) => e as int).toList());
         final user = UserModel.fromJson(json.decode(body));
         _items.removeIfExist(user.ip);
-        server.broadcast.emit(_serverList, _listMessage);
-        server.emit(_serverList, _listMessage);
+        server.broadcast.emit(_serverList, _usersListMessage);
+        server.emit(_serverList, _usersListMessage);
       });
-      server.on(_joinLobby, (data) {
+      server.on(_joinLobby, (data) async {
         if (data is! List) return;
         final body = _readMessage(data.map((e) => e as int).toList());
         _items.addIfNotExist(NetworkDeviceModel.fromJson(json.decode(body)));
-        server.broadcast.emit(_serverList, _listMessage);
-        server.emit(_serverList, _listMessage);
+        server.broadcast.emit(_serverList, _usersListMessage);
+        server.emit(_serverList, _usersListMessage);
+        final items = await sembastDataSource.getMessages(user.ip);
+        server.emit(
+            _oldClientMessage,
+            utf8.encode(json.encode(items
+                .map((e) => ServerMessageModel.fromEntity(e).toJson)
+                .toList())));
       });
       server.on(_serverDC, (data) {
         server.broadcast.emit(_serverDC, null);
@@ -119,8 +139,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
         if (data is! List) return;
         final ip = _readMessage(data.map((e) => e as int).toList());
         _items.toggleReadyWhere(ip);
-        server.broadcast.emit(_serverList, _listMessage);
-        server.emit(_serverList, _listMessage);
+        server.broadcast.emit(_serverList, _usersListMessage);
+        server.emit(_serverList, _usersListMessage);
       });
     });
     await server.listen(1212);
@@ -143,11 +163,23 @@ class CommandsDataSourceImpl implements CommandsDataSource {
     _connectToServer(server?.ip);
     clientSocket?.on(_clientMessage, (data) {
       if (data is! List) return;
+      if (controller.isClosed) return;
       final body =
           json.decode(_readMessage(data.map((e) => e as int).toList()));
-      if (controller.isClosed) return;
       controller.add(ServerMessageModel.fromJson(body));
     });
+    clientSocket?.once(_oldClientMessage, (data) {
+      if (data is! List) return;
+      if (controller.isClosed) return;
+      final body =
+          json.decode(_readMessage(data.map((e) => e as int).toList()));
+      if (body is! List) return;
+      final items = body.map((e) => ServerMessageModel.fromJson(e)).toList();
+      for (int i = 0; i < items.length; i++) {
+        controller.add(items[i]);
+      }
+    });
+
     final device = NetworkDeviceModel(
       id: user.ip,
       name: user.username,

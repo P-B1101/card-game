@@ -1,6 +1,7 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io/socket_io.dart';
 
@@ -37,6 +38,14 @@ abstract class RegisterServer {
   @lazySingleton
   Server get server => Server();
 }
+
+@module
+abstract class RegisterStoreRef {
+  @lazySingleton
+  StoreRef get store => StoreRef.main();
+}
+
+
 
 // @module
 // abstract class RegisterSocketIo {
