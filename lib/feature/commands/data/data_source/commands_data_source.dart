@@ -129,8 +129,6 @@ class CommandsDataSourceImpl implements CommandsDataSource {
       server.on(_serverDC, (data) {
         server.broadcast.emit(_serverDC, null);
         server.emit(_serverDC, null);
-        clientSocket?.close();
-        clientSocket = null;
       });
       server.on(_setReady, (data) {
         if (data is! List) return;
@@ -252,6 +250,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
       if (controller.isClosed) return;
       controller.add(true);
       controller.close();
+      clientSocket?.close();
+      clientSocket = null;
     });
     yield* controller.stream;
   }
