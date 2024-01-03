@@ -87,15 +87,9 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   @override
   Future<void> createServer(User user) async {
     final nsp = server.of('/card-game');
-    nsp.on('connection', (server) async {
+    nsp.on('connection', (server) {
       if (server is! Socket) return;
       server.emit(_serverList, _usersListMessage);
-      final items = await sembastDataSource.getMessages(user.ip);
-      server.emit(
-          _clientMessage,
-          utf8.encode(json.encode(items
-              .map((e) => ServerMessageModel.fromEntity(e).toJson)
-              .toList())));
       server.on(_serverMessage, (data) {
         if (data is! List) return;
         final body = _readMessage(data.map((e) => e as int).toList());
