@@ -14,7 +14,7 @@ abstract class SembastDataSource {
 class SembastDataSourceImpl implements SembastDataSource {
   Database? _db;
   final factory = databaseFactoryIo;
-  static const dbPath = 'PhOWWARE.db';
+  static const dbPath = 'xIlHpACX2M0WtpfJOs8ZV1OQPnsUJyLW.db';
   final StoreRef store;
 
   SembastDataSourceImpl({
@@ -32,12 +32,15 @@ class SembastDataSourceImpl implements SembastDataSource {
     String serverIp,
   ) async {
     await _initializeDb();
-    final items = await getMessages(serverIp);
-    items.add(message);
-    await store.record(serverIp).put(
-          _db!,
-          items.map((e) => ServerMessageModel.fromEntity(e).toJson).toList(),
-        );
+    await _db!.transaction((transaction) async {
+      final value = await store.record(serverIp).get(transaction);
+      if (value is! List) return [];
+      final items = value.map((e) => ServerMessageModel.fromJson(e)).toList();
+      await store.record(serverIp).put(
+            transaction,
+            items.map((e) => ServerMessageModel.fromEntity(e).toJson).toList(),
+          );
+    });
   }
 
   @override
