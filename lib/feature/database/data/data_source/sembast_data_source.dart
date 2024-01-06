@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
@@ -31,20 +32,29 @@ class SembastDataSourceImpl implements SembastDataSource {
     ServerMessage message,
     String serverIp,
   ) async {
-    await _initializeDb();
-    final items = await getMessages(serverIp);
-    items.add(message);
-    await store.record(serverIp).put(
-          _db!,
-          items.map((e) => ServerMessageModel.fromEntity(e).toJson).toList(),
-        );
+    try {
+      await _initializeDb();
+      final items = await getMessages(serverIp);
+      items.add(message);
+      await store.record(serverIp).put(
+            _db!,
+            items.map((e) => ServerMessageModel.fromEntity(e).toJson).toList(),
+          );
+    } catch (error) {
+      debugPrint(error.toString());
+    }
   }
 
   @override
   Future<List<ServerMessage>> getMessages(String serverIp) async {
-    await _initializeDb();
-    final value = await store.record(serverIp).get(_db!);
-    if (value is! List) return [];
-    return value.map((e) => ServerMessageModel.fromJson(e)).toList();
+    try {
+      await _initializeDb();
+      final value = await store.record(serverIp).get(_db!);
+      if (value is! List) return [];
+      return value.map((e) => ServerMessageModel.fromJson(e)).toList();
+    } catch (error) {
+      debugPrint(error.toString());
+      return [];
+    }
   }
 }
