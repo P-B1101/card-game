@@ -26,17 +26,21 @@ class CommandsRepositoryImpl implements CommandsRepository {
   Future<Either<Failure, Stream<ServerMessage>>> connectToServer(
     User user,
     NetworkDevice? server,
+    bool isLobby,
   ) =>
       repositoryHelper
-          .tryToLoad(() => dataSource.connectToServer(user, server));
+          .tryToLoad(() => dataSource.connectToServer(user, server, isLobby));
 
   @override
-  Future<Either<Failure, void>> createServer(User user) =>
-      repositoryHelper.tryToLoad(() => dataSource.createServer(user));
+  Future<Either<Failure, void>> createServer(
+    User user,
+    bool isLobby,
+  ) =>
+      repositoryHelper.tryToLoad(() => dataSource.createServer(user, isLobby));
 
   @override
-  Future<Either<Failure, void>> closeServer(User user) =>
-      repositoryHelper.tryToLoad(() => dataSource.closeServer(user));
+  Future<Either<Failure, void>> closeServer(User user, bool isLobby) =>
+      repositoryHelper.tryToLoad(() => dataSource.closeServer(user, isLobby));
 
   @override
   Future<Either<Failure, void>> disconnectFromServer(User user) =>
@@ -59,8 +63,8 @@ class CommandsRepositoryImpl implements CommandsRepository {
       repositoryHelper.tryToLoad(() => dataSource.getPlayers());
 
   @override
-  Stream<bool> listenForServerConnection() =>
-      dataSource.listenForServerConnection();
+  Stream<bool> listenForServerConnection(bool isLobby) =>
+      dataSource.listenForServerConnection(isLobby);
 
   @override
   Future<Either<Failure, void>> setReady() => repositoryHelper.tryToLoad(
@@ -68,5 +72,10 @@ class CommandsRepositoryImpl implements CommandsRepository {
           final ip = await networkManager.getMyIp();
           return dataSource.setReady(ip);
         },
+      );
+
+  @override
+  Future<Either<Failure, void>> startGame() => repositoryHelper.tryToLoad(
+        () async => dataSource.startGame(),
       );
 }

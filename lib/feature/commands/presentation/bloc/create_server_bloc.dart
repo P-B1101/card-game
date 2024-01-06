@@ -24,18 +24,21 @@ class CreateServerBloc extends Bloc<CreateServerEvent, CreateServerState> {
   ) : super(CreateServerInitial()) {
     on<DoCreateServerEvent>(_onDoCreateServerEvent, transformer: droppable());
     on<AddMessageEvent>(_onAddMessageEvent);
+    on<DisconnectServerEvent>(
+      _onDisconnectServerEvent,
+      transformer: droppable(),
+    );
   }
-
-  // StreamSubscription? _sub;
-  User? _user;
 
   Future<void> _onDoCreateServerEvent(
     DoCreateServerEvent event,
     Emitter<CreateServerState> emit,
   ) async {
-    _user = event.user;
     emit(CreateServerLoading());
-    final result = await _createServer(Params(user: event.user));
+    final result = await _createServer(Params(
+      user: event.user,
+      isLobby: event.isLobby,
+    ));
     await result.fold(
       (failure) async => emit(failure.toState),
       (response) async => emit(CreateServerSuccess()),
@@ -49,11 +52,11 @@ class CreateServerBloc extends Bloc<CreateServerEvent, CreateServerState> {
     emit(ServerMessageReceived(messages: [event.message, ...state.messages]));
   }
 
-  @override
-  Future<void> close() {
-    if (_user != null) _closeServer(cls.Params(user: _user!));
-    // _sub?.cancel();
-    return super.close();
+  Future<void> _onDisconnectServerEvent(
+    DisconnectServerEvent event,
+    Emitter<CreateServerState> emit,
+  ) async {
+    _closeServer(cls.Params(user: event.user, isLobby: event.isLobby));
   }
 }
 

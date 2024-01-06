@@ -17,17 +17,23 @@ class ConnectToServer extends UseCase<Stream<ServerMessage>, Params> {
 
   @override
   Future<Either<Failure, Stream<ServerMessage>>> call(Params param) =>
-      repository.connectToServer(param.user, param.server);
+      repository.connectToServer(
+        param.user,
+        param.server,
+        param.isLobby,
+      );
 }
 
 class Params extends NoParams {
   final User user;
   final NetworkDevice? server;
+  final bool isLobby;
   const Params({
     required this.user,
     required this.server,
+    required this.isLobby,
   });
 
   @override
-  List<Object?> get props => [user, server];
+  List<Object?> get props => [user, server, isLobby];
 }

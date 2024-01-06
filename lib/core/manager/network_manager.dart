@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:card_game/core/error/exceptions.dart';
+import 'package:card_game/core/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
@@ -39,7 +40,7 @@ class NetworkManagerImpl implements NetworkManager {
       final String subnet = mIP.substring(0, mIP.lastIndexOf('.'));
       final result = <Device>[];
       for (int i = 2; i < 256; i++) {
-        const port = 1212;
+        const port = Utils.lobbyPort;
         final ip = '$subnet.$i';
         try {
           final socket = await Socket.connect(ip, port,

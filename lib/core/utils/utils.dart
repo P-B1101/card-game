@@ -8,6 +8,12 @@ class Utils {
   static void exitApp() {
     exit(0);
   }
+
+  static const maxCountDown = 5;
+  
+  static const lobbyPort = 1212;
+
+  static const boardPort = 1213;
 }
 
 class UiUtils {

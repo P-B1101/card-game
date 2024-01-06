@@ -24,4 +24,12 @@ final class ConnectToServerSuccess extends ConnectToServerState {
 final class ConnectToServerFailure extends ConnectToServerState {}
 
 
-final class DisconnectFromServerState extends ConnectToServerState {}
+final class DisconnectFromServerState extends ConnectToServerState {
+  final bool isLobby;
+  const DisconnectFromServerState({
+    required this.isLobby,
+  });
+
+  @override
+  List<Object?> get props => [isLobby];
+}

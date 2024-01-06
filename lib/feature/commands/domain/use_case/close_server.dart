@@ -15,13 +15,15 @@ class CloseServer extends UseCase<void, Params> {
 
   @override
   Future<Either<Failure, void>> call(Params param) =>
-      repository.closeServer(param.user);
+      repository.closeServer(param.user, param.isLobby);
 }
 
-class Params extends NoParams{
+class Params extends NoParams {
   final User user;
+  final bool isLobby;
   const Params({
     required this.user,
+    required this.isLobby,
   });
 
   @override

@@ -6,14 +6,18 @@ import '../entity/network_device.dart';
 import '../entity/server_message.dart';
 
 abstract class CommandsRepository {
-  Future<Either<Failure, void>> createServer(User user);
+  Future<Either<Failure, void>> createServer(
+    User user,
+    bool isLobby,
+  );
 
   Future<Either<Failure, Stream<ServerMessage>>> connectToServer(
     User user,
     NetworkDevice? server,
+    bool isLobby,
   );
 
-  Future<Either<Failure, void>> closeServer(User user);
+  Future<Either<Failure, void>> closeServer(User user, bool isLobby);
 
   Future<Either<Failure, void>> disconnectFromServer(User user);
 
@@ -26,7 +30,9 @@ abstract class CommandsRepository {
 
   Future<Either<Failure, Stream<List<NetworkDevice>>>> getPlayers();
 
-  Stream<bool> listenForServerConnection();
+  Stream<bool> listenForServerConnection(bool isLobby);
 
-  Future<Either<Failure,void>> setReady();
+  Future<Either<Failure, void>> setReady();
+
+  Future<Either<Failure, void>> startGame();
 }

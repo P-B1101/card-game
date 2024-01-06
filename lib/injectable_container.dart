@@ -44,14 +44,3 @@ abstract class RegisterStoreRef {
   @lazySingleton
   StoreRef get store => StoreRef.main();
 }
-
-
-
-// @module
-// abstract class RegisterSocketIo {
-//   @lazySingleton
-//   socket_io.Socket get socket => socket_io.io(
-//         'http://localhost:1212/card-game',
-//         socket_io.OptionBuilder().setTransports(['websocket']).build(),
-//       );
-// }

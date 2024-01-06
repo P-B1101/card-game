@@ -1,4 +1,5 @@
 import 'package:animation_wrappers/animations/faded_slide_animation.dart';
+import 'package:card_game/feature/menu/presentation/cubit/start_game_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -116,44 +117,59 @@ class _MessageItemWidget extends StatelessWidget {
         top: 4,
         bottom: 4,
       ),
-      child: message.status != ServerMessageStatus.message
-          ? Text(
-              message.status.toStringValue(context, message.user),
+      child: switch (message.status) {
+        ServerMessageType.join || ServerMessageType.leave => Text(
+            message.status.toStringValue(context, message.user),
+            textAlign: TextAlign.start,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: Fonts.regular500,
+              color: MColors.whiteColor.withOpacity(.5),
+            ),
+          ),
+        ServerMessageType.message => Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${message.user}: ',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: Fonts.black800,
+                  color: isMe ? MColors.seeGreen : MColors.ecru,
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    message.message,
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: Fonts.light300,
+                      color: MColors.whiteColor.withOpacity(.9),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ServerMessageType.startGame =>
+          BlocBuilder<StartGameCubit, StartGameState>(
+            builder: (context, state) => Text(
+              Strings.of(context)
+                  .game_start_in_place_holder
+                  .replaceFirst('\$0', message.message),
               textAlign: TextAlign.start,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: Fonts.regular500,
                 color: MColors.whiteColor.withOpacity(.5),
               ),
-            )
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${message.user}: ',
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: Fonts.black800,
-                    color: isMe ? MColors.seeGreen : MColors.ecru,
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      message.message,
-                      textAlign: TextAlign.start,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: Fonts.light300,
-                        color: MColors.whiteColor.withOpacity(.9),
-                      ),
-                    ),
-                  ),
-                )
-              ],
             ),
+          ),
+      },
     );
   }
 }

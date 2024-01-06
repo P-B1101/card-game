@@ -1,3 +1,4 @@
+import 'package:card_game/feature/menu/presentation/cubit/start_game_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -47,21 +48,30 @@ class UserListWidget extends StatelessWidget {
                 crossFadeState: isServer || !state.items.is3PlayerReady
                     ? CrossFadeState.showFirst
                     : CrossFadeState.showSecond,
-                firstChild: MButtonWidget(
-                  borderRadius: BorderRadius.zero,
-                  color: MColors.keppel,
-                  enableClickWhenDisable: false,
-                  onClick: () {
-                    if (isServer) {
-                      // TODO: implement start game.
-                      return;
-                    }
-                    context.read<ConnectToServerBloc>().add(SetReadyEvent());
-                  },
-                  isEnable: isServer ? state.items.is3PlayerReady : true,
-                  title: isServer
-                      ? Strings.of(context).start_label
-                      : Strings.of(context).ready_label,
+                firstChild: BlocBuilder<StartGameCubit, StartGameState>(
+                  buildWhen: (previous, current) =>
+                      previous.isGameStarted != current.isGameStarted,
+                  builder: (context, sState) => MButtonWidget(
+                    borderRadius: BorderRadius.zero,
+                    color: MColors.keppel,
+                    enableClickWhenDisable: false,
+                    onClick: () {
+                      if (isServer) {
+                        context
+                            .read<ConnectToServerBloc>()
+                            .add(StartGameEvent());
+                        return;
+                      }
+                      context.read<ConnectToServerBloc>().add(SetReadyEvent());
+                    },
+                    // isEnable: isServer
+                    //     ? !sState.isGameStarted && state.items.is3PlayerReady
+                    //     : !sState.isGameStarted,
+                    isEnable: !sState.isGameStarted,
+                    title: isServer
+                        ? Strings.of(context).start_label
+                        : Strings.of(context).ready_label,
+                  ),
                 ),
                 secondChild: const SizedBox(width: double.infinity),
               ),

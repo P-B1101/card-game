@@ -39,24 +39,32 @@ enum ButtonType {
   textAndIcon,
 }
 
-enum ServerMessageStatus {
+enum ServerMessageType {
   message,
   join,
-  leave;
+  leave,
+  startGame;
 
   String get value => switch (this) {
-        ServerMessageStatus.message => 'msg',
-        ServerMessageStatus.join => 'jn',
-        ServerMessageStatus.leave => 'lve',
+        ServerMessageType.message => 'msg',
+        ServerMessageType.join => 'jn',
+        ServerMessageType.leave => 'lve',
+        ServerMessageType.startGame => 'strt-gme',
       };
 
   String toStringValue(BuildContext context, String user) => switch (this) {
-        ServerMessageStatus.message => '',
-        ServerMessageStatus.join => Strings.of(context)
+        ServerMessageType.message => '',
+        ServerMessageType.join => Strings.of(context)
             .user_connected_place_holder
             .replaceFirst('\$0', user),
-        ServerMessageStatus.leave => Strings.of(context)
+        ServerMessageType.leave => Strings.of(context)
             .user_disconnected_place_holder
             .replaceFirst('\$0', user),
+        ServerMessageType.startGame => '',
       };
+}
+
+enum GameCommands {
+  shuffle,
+  playHand,
 }

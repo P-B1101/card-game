@@ -7,11 +7,28 @@ import '../../feature/language/manager/localizatios.dart';
 import '../../feature/user/domain/entity/user.dart';
 import 'enum.dart';
 
+extension DateTimeExt on DateTime {
+  String get generateId => '$year${month.toTwoDigit}${day.toTwoDigit}'
+      '${hour.toTwoDigit}${minute.toTwoDigit}${second.toTwoDigit}'
+      '${millisecond.toThreeDigit}${microsecond.toThreeDigit}';
+}
+
+extension IntExt on int {
+  String get toTwoDigit => this >= 0 && this < 10 ? '0$this' : '$this';
+
+  String get toThreeDigit => this >= 0 && this < 10
+      ? '00$this'
+      : this < 100
+          ? '0$this'
+          : '$this';
+}
+
 extension StringExt on String {
-  ServerMessageStatus? get toServerMessageStatus => switch (this) {
-        'msg' => ServerMessageStatus.message,
-        'jn' => ServerMessageStatus.join,
-        'lve' => ServerMessageStatus.leave,
+  ServerMessageType? get toServerMessageStatus => switch (this) {
+        'msg' => ServerMessageType.message,
+        'jn' => ServerMessageType.join,
+        'lve' => ServerMessageType.leave,
+        'strt-gme' => ServerMessageType.startGame,
         _ => null,
       };
 }

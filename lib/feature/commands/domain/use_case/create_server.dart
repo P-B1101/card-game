@@ -15,13 +15,15 @@ class CreateServer extends UseCase<void, Params> {
 
   @override
   Future<Either<Failure, void>> call(Params param) =>
-      repository.createServer(param.user);
+      repository.createServer(param.user, param.isLobby);
 }
 
 class Params extends NoParams {
   final User user;
+  final bool isLobby;
   const Params({
     required this.user,
+    required this.isLobby,
   });
 
   @override

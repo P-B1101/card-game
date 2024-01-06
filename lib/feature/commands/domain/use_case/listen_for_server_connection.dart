@@ -9,5 +9,5 @@ class ListenForserverConnection {
     required this.repository,
   });
 
-  Stream<bool> call() => repository.listenForServerConnection();
+  Stream<bool> call(bool isLobby) => repository.listenForServerConnection(isLobby);
 }

@@ -26,9 +26,14 @@ abstract class $AppRouter extends _i5.RootStackRouter {
   @override
   final Map<String, _i5.PageFactory> pagesMap = {
     BoardRoute.name: (routeData) {
+      final args = routeData.argsAs<BoardRouteArgs>(
+          orElse: () => const BoardRouteArgs());
       return _i5.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i1.BoardPage(),
+        child: _i1.BoardPage(
+          key: args.key,
+          device: args.device,
+        ),
       );
     },
     LobbyRoute.name: (routeData) {
@@ -59,16 +64,40 @@ abstract class $AppRouter extends _i5.RootStackRouter {
 
 /// generated route for
 /// [_i1.BoardPage]
-class BoardRoute extends _i5.PageRouteInfo<void> {
-  const BoardRoute({List<_i5.PageRouteInfo>? children})
-      : super(
+class BoardRoute extends _i5.PageRouteInfo<BoardRouteArgs> {
+  BoardRoute({
+    _i6.Key? key,
+    _i7.NetworkDevice? device,
+    List<_i5.PageRouteInfo>? children,
+  }) : super(
           BoardRoute.name,
+          args: BoardRouteArgs(
+            key: key,
+            device: device,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'BoardRoute';
 
-  static const _i5.PageInfo<void> page = _i5.PageInfo<void>(name);
+  static const _i5.PageInfo<BoardRouteArgs> page =
+      _i5.PageInfo<BoardRouteArgs>(name);
+}
+
+class BoardRouteArgs {
+  const BoardRouteArgs({
+    this.key,
+    this.device,
+  });
+
+  final _i6.Key? key;
+
+  final _i7.NetworkDevice? device;
+
+  @override
+  String toString() {
+    return 'BoardRouteArgs{key: $key, device: $device}';
+  }
 }
 
 /// generated route for

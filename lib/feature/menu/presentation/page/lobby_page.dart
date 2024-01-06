@@ -12,6 +12,7 @@ import '../../../commands/presentation/bloc/create_server_bloc.dart';
 import '../../../database/presentation/cubit/username_cubit.dart';
 import '../../../dialog/manager/dialog_manager.dart';
 import '../../../router/app_router.gr.dart';
+import '../cubit/start_game_cubit.dart';
 import '../widget/lobby/message_box_widget.dart';
 import '../widget/lobby/user_list_widget.dart';
 
@@ -37,6 +38,9 @@ class LobbyPage extends StatelessWidget {
         BlocProvider<PlayersBloc>(
           create: (context) => getIt<PlayersBloc>(),
         ),
+        BlocProvider<StartGameCubit>(
+          create: (context) => getIt<StartGameCubit>(),
+        ),
       ],
       child: _LobbyPage(device: device),
     );
@@ -54,10 +58,19 @@ class _LobbyPage extends StatefulWidget {
 }
 
 class __LobbyPageState extends State<_LobbyPage> {
+  late final _createServerBloc = context.read<CreateServerBloc>();
+  late final _userCubit = context.read<UsernameCubit>();
+
   @override
   void initState() {
     super.initState();
     _handleInitState();
+  }
+
+  @override
+  void dispose() {
+    _createServerBloc.add(DisconnectServerEvent.lobby(_userCubit.state.user));
+    super.dispose();
   }
 
   @override
@@ -69,6 +82,10 @@ class __LobbyPageState extends State<_LobbyPage> {
         ),
         BlocListener<ConnectToServerBloc, ConnectToServerState>(
           listener: (context, state) => _handleConnectToServerState(state),
+        ),
+        BlocListener<StartGameCubit, StartGameState>(
+          listener: (context, state) =>
+              _createServerBloc.add(AddMessageEvent.countDown(state.countDown)),
         ),
       ],
       child: Scaffold(
@@ -88,12 +105,10 @@ class __LobbyPageState extends State<_LobbyPage> {
         .read<ToolbarCubit>()
         .setCallback(() => context.navigateTo(const MenuRoute()));
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final state = context.read<UsernameCubit>().state;
+      final state = _userCubit.state;
       if (state.hasUser) {
         if (_isServer) {
-          context
-              .read<CreateServerBloc>()
-              .add(DoCreateServerEvent(user: state.user));
+          _createServerBloc.add(DoCreateServerEvent.lobby(state.user));
         } else {
           _joinToServer();
         }
@@ -104,9 +119,9 @@ class __LobbyPageState extends State<_LobbyPage> {
   }
 
   void _joinToServer() {
-    final state = context.read<UsernameCubit>().state;
+    final state = _userCubit.state;
     if (state.hasUser) {
-      context.read<ConnectToServerBloc>().add(DoConnectToServerEvent(
+      context.read<ConnectToServerBloc>().add(DoConnectToServerEvent.lobby(
             user: state.user,
             server: widget.device,
           ));
@@ -123,10 +138,10 @@ class __LobbyPageState extends State<_LobbyPage> {
       context.pushRoute(const MenuRoute());
       return;
     }
-    final user = await context.read<UsernameCubit>().saveUser(username);
+    final user = await _userCubit.saveUser(username);
     if (!mounted) return;
     if (_isServer) {
-      context.read<CreateServerBloc>().add(DoCreateServerEvent(user: user));
+      _createServerBloc.add(DoCreateServerEvent.lobby(user));
     } else {
       _joinToServer();
     }
@@ -147,15 +162,22 @@ class __LobbyPageState extends State<_LobbyPage> {
     context.navigateTo(const MenuRoute());
   }
 
+  void _handleStartGame() async {
+    await context.read<StartGameCubit>().startCountDown();
+    if (!mounted) return;
+    context.navigateTo(BoardRoute(device: widget.device));
+  }
+
   void _handleConnectToServerState(ConnectToServerState state) {
     if (state is ConnectToServerSuccess && state.item != null) {
-      context
-          .read<CreateServerBloc>()
-          .add(AddMessageEvent(message: state.item!));
+      if (state.item?.isStartGame ?? false) {
+        _handleStartGame();
+      }
+      _createServerBloc.add(AddMessageEvent(message: state.item!));
       context.read<PlayersBloc>().add(GetPlayersEvent());
     }
     if (state is DisconnectFromServerState) {
-      showServerDisconnectedDialog();
+      if (state.isLobby) showServerDisconnectedDialog();
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:card_game/feature/commands/domain/use_case/start_game.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
@@ -27,12 +28,14 @@ class ConnectToServerBloc
   final dc.DisconnectFromServer _disconnectFromServer;
   final ListenForserverConnection _listenForserverConnection;
   final SetReady _setReady;
+  final StartGame _startGame;
   ConnectToServerBloc(
     this._connectToServer,
     this._sendMessage,
     this._disconnectFromServer,
     this._listenForserverConnection,
     this._setReady,
+    this._startGame,
   ) : super(ConnectToServerInitial()) {
     on<DoConnectToServerEvent>(
       _onDoConnectToServerEvent,
@@ -45,6 +48,7 @@ class ConnectToServerBloc
     on<AddMessageFromServerEvent>(_onAddMessageFromServerEvent);
     on<DisconnectFromServerEvent>(_onDisconnectFromServerEvent);
     on<SetReadyEvent>(_onSetReadyEvent, transformer: droppable());
+    on<StartGameEvent>(_onStartGameEvent, transformer: droppable());
   }
   StreamSubscription? _messageSub;
   StreamSubscription? _connectionSub;
@@ -56,18 +60,21 @@ class ConnectToServerBloc
   ) async {
     _user = event.user;
     emit(ConnectToServerLoading());
-    final result =
-        await _connectToServer(Params(user: event.user, server: event.server));
+    final result = await _connectToServer(Params(
+      user: event.user,
+      server: event.server,
+      isLobby: event.isLobby,
+    ));
     final newState = await result.fold(
       (failure) async => failure.toState,
       (response) async {
         _messageSub = response.listen((event) {
           if (!isClosed) add(AddMessageFromServerEvent(item: event));
         });
-        _connectionSub = _listenForserverConnection().listen((event) {
+        _connectionSub =
+            _listenForserverConnection(event.isLobby).listen((event) {
           if (isClosed) return;
-          if (event) _user = null;
-          if (event) add(DisconnectFromServerEvent());
+          add(DisconnectFromServerEvent(isLobby: event));
         });
         return const ConnectToServerSuccess();
       },
@@ -95,6 +102,13 @@ class ConnectToServerBloc
     _setReady(const NoParams());
   }
 
+  Future<void> _onStartGameEvent(
+    StartGameEvent event,
+    Emitter<ConnectToServerState> emit,
+  ) async {
+    _startGame(const NoParams());
+  }
+
   Future<void> _onAddMessageFromServerEvent(
     AddMessageFromServerEvent event,
     Emitter<ConnectToServerState> emit,
@@ -106,7 +120,7 @@ class ConnectToServerBloc
     DisconnectFromServerEvent event,
     Emitter<ConnectToServerState> emit,
   ) async {
-    emit(DisconnectFromServerState());
+    emit(DisconnectFromServerState(isLobby: event.isLobby));
   }
 
   @override

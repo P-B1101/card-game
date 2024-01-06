@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:card_game/core/utils/enum.dart';
+import 'package:card_game/core/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:socket_io/socket_io.dart';
@@ -18,14 +19,15 @@ import '../model/network_device_model.dart';
 import '../model/server_message_model.dart';
 
 abstract class CommandsDataSource {
-  Future<void> createServer(User user);
+  Future<void> createServer(User user, bool isLobby);
 
   Future<Stream<ServerMessage>> connectToServer(
     User user,
     NetworkDevice? server,
+    bool isLobby,
   );
 
-  Future<void> closeServer(User user);
+  Future<void> closeServer(User user, bool isLobby);
 
   Future<void> disconnectFromServer(User user);
 
@@ -36,11 +38,13 @@ abstract class CommandsDataSource {
 
   void setReady(String ip);
 
+  void startGame();
+
   Future<List<NetworkDevice>> getServers(bool useCachedData);
 
   Future<Stream<List<NetworkDevice>>> getPlayers();
 
-  Stream<bool> listenForServerConnection();
+  Stream<bool> listenForServerConnection(bool isLobby);
 }
 
 @LazySingleton(as: CommandsDataSource)
@@ -65,19 +69,30 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   static const _joinLobby = 'jn-lby';
   static const _serverDC = 'srv-dc';
   static const _setReady = 'rdy';
+  static const _startGame = 'strt-gme';
+  static const _shuffle = 'sfle';
+  static const _playHand = 'ply-hnd';
+  static const _lobby = 'lby';
+  static const _board = 'brd';
 
-  void _sendClientMessage(String? message, [String? event]) =>
-      clientSocket?.emit(event ?? _serverMessage,
-          message == null ? null : utf8.encode(message));
+  void _sendClientMessage(dynamic message, [String? event]) =>
+      clientSocket?.emit(
+        event ?? _serverMessage,
+        message == null
+            ? null
+            : message is String
+                ? utf8.encode(message)
+                : message,
+      );
 
   String _readMessage(List<int> bytes) => utf8.decode(bytes);
 
   Uint8List get _usersListMessage => utf8.encode(json.encode(
       _items.map((e) => NetworkDeviceModel.fromEntity(e).toJson).toList()));
 
-  void _connectToServer(String? ip) {
+  void _connectToServer(String? ip, int port, String path) {
     final host = ip ?? 'localhost';
-    final uri = 'http://$host:1212/card-game';
+    final uri = 'http://$host:$port/$path';
     clientSocket?.close();
     clientSocket = socket_io.io(
       uri,
@@ -86,16 +101,16 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   }
 
   @override
-  Future<void> createServer(User user) async {
-    final nsp = server.of('/card-game');
+  Future<void> createServer(User user, bool isLobby) async {
+    final nsp = server.of(isLobby ? '/$_lobby' : '/$_board');
     nsp.on('connection', (server) {
       if (server is! Socket) return;
-      server.emit(_serverList, _usersListMessage);
+      if (isLobby) server.emit(_serverList, _usersListMessage);
       server.on(_serverMessage, (data) {
         if (data is! List) return;
         final body = _readMessage(data.map((e) => e as int).toList());
         final message = ServerMessageModel.fromJson(json.decode(body));
-        if (message.status == ServerMessageStatus.message) {
+        if (message.status == ServerMessageType.message) {
           sembastDataSource.addMessage(message, user.ip);
         }
         server.broadcast.emit(_clientMessage, data);
@@ -127,8 +142,8 @@ class CommandsDataSourceImpl implements CommandsDataSource {
                 .toList())));
       });
       server.on(_serverDC, (data) {
-        server.broadcast.emit(_serverDC, null);
-        server.emit(_serverDC, null);
+        server.broadcast.emit(_serverDC, data);
+        server.emit(_serverDC, data);
       });
       server.on(_setReady, (data) {
         if (data is! List) return;
@@ -137,25 +152,42 @@ class CommandsDataSourceImpl implements CommandsDataSource {
         server.broadcast.emit(_serverList, _usersListMessage);
         server.emit(_serverList, _usersListMessage);
       });
+      server.on(_startGame, (data) {
+        server.broadcast.emit(_clientMessage, data);
+        server.emit(_clientMessage, data);
+      });
+      server.on(_shuffle, (data) {
+        server.broadcast.emit(_shuffle, data);
+        server.emit(_shuffle, data);
+      });
+      server.on(_playHand, (data) {
+        server.broadcast.emit(_playHand, data);
+        server.emit(_playHand, data);
+      });
     });
-    await server.listen(1212);
+    await server.listen(isLobby ? Utils.lobbyPort : Utils.boardPort);
   }
 
   @override
-  Future<void> closeServer(User user) async {
-    _sendClientMessage(null, _serverDC);
+  Future<void> closeServer(User user, bool isLobby) async {
+    _sendClientMessage(isLobby, _serverDC);
     await Future.delayed(const Duration(milliseconds: 500));
-    final nsp = server.of('/card-game');
+    final nsp = server.of(isLobby ? '/$_lobby' : '/$_board');
     await nsp.server.close();
   }
 
   @override
   Future<Stream<ServerMessage>> connectToServer(
     User user,
-    NetworkDevice? server,
+    NetworkDevice? host,
+    bool isLobby,
   ) async {
     StreamController<ServerMessage> controller = StreamController();
-    _connectToServer(server?.ip);
+    _connectToServer(
+      host?.ip,
+      isLobby ? Utils.lobbyPort : Utils.boardPort,
+      isLobby ? _lobby : _board,
+    );
     clientSocket?.on(_clientMessage, (data) {
       if (data is! List) return;
       if (controller.isClosed) return;
@@ -179,9 +211,9 @@ class CommandsDataSourceImpl implements CommandsDataSource {
       id: user.ip,
       name: user.username,
       ip: user.ip,
-      isServer: server == null,
-      isReady: server == null,
-      serverIp: server?.ip ?? user.ip,
+      isServer: host == null,
+      isReady: host == null,
+      serverIp: host?.ip ?? user.ip,
     );
     _sendClientMessage(json.encode(device.toJson), _joinLobby);
     final serverMessage = ServerMessageModel.hello(user.username);
@@ -244,11 +276,11 @@ class CommandsDataSourceImpl implements CommandsDataSource {
   }
 
   @override
-  Stream<bool> listenForServerConnection() async* {
+  Stream<bool> listenForServerConnection(bool isLobby) async* {
     final controller = StreamController<bool>();
-    clientSocket?.on(_serverDC, (_) {
+    clientSocket?.on(_serverDC, (data) {
       if (controller.isClosed) return;
-      controller.add(true);
+      controller.add(data);
       controller.close();
       clientSocket?.close();
       clientSocket = null;
@@ -258,4 +290,9 @@ class CommandsDataSourceImpl implements CommandsDataSource {
 
   @override
   void setReady(String ip) => _sendClientMessage(ip, _setReady);
+
+  @override
+  void startGame() => _sendClientMessage(
+      json.encode(ServerMessageModel.countDown(Utils.maxCountDown).toJson),
+      _startGame);
 }
