@@ -48,10 +48,18 @@ class _BoardPage extends StatefulWidget {
 }
 
 class __BoardPageState extends State<_BoardPage> {
+  late final _createServerBloc = context.read<CreateServerBloc>();
+  late final _userCubit = context.read<UsernameCubit>();
   @override
   void initState() {
     super.initState();
     _handleInitState();
+  }
+
+  @override
+  void dispose() {
+    _createServerBloc.add(DisconnectServerEvent.board(_userCubit.state.user));
+    super.dispose();
   }
 
   @override
@@ -85,9 +93,7 @@ class __BoardPageState extends State<_BoardPage> {
         .setCallback(() => context.navigateTo(const MenuRoute()));
     final state = context.read<UsernameCubit>().state;
     if (_isServer) {
-      context
-          .read<CreateServerBloc>()
-          .add(DoCreateServerEvent.board(state.user));
+      _createServerBloc.add(DoCreateServerEvent.board(state.user));
     } else {
       _joinToServer();
     }
@@ -121,9 +127,7 @@ class __BoardPageState extends State<_BoardPage> {
       // if (state.item?.isStartGame ?? false) {
       //   _handleStartGame();
       // }
-      // context
-      //     .read<CreateServerBloc>()
-      //     .add(AddMessageEvent(message: state.item!));
+      //_createServerBloc.add(AddMessageEvent(message: state.item!));
       // context.read<PlayersBloc>().add(GetPlayersEvent());
     }
     if (state is DisconnectFromServerState) {

@@ -163,8 +163,9 @@ class __LobbyPageState extends State<_LobbyPage> {
   }
 
   void _handleStartGame() async {
-    await context.read<StartGameCubit>().startCountDown();
+    final isPlayer = await context.read<StartGameCubit>().startCountDown();
     if (!mounted) return;
+    if (!isPlayer) return;
     context.navigateTo(BoardRoute(device: widget.device));
   }
 
