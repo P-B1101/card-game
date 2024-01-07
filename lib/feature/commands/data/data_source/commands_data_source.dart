@@ -49,14 +49,13 @@ abstract class CommandsDataSource {
 
 @LazySingleton(as: CommandsDataSource)
 class CommandsDataSourceImpl implements CommandsDataSource {
-  final Server server;
+  Server? _server;
   final NetworkManager networkManager;
   final SembastDataSource sembastDataSource;
   final List<NetworkDevice> _items = [];
   socket_io.Socket? clientSocket;
 
   CommandsDataSourceImpl({
-    required this.server,
     required this.networkManager,
     required this.sembastDataSource,
   });
@@ -102,8 +101,10 @@ class CommandsDataSourceImpl implements CommandsDataSource {
 
   @override
   Future<void> createServer(User user, bool isLobby) async {
-    final nsp = server.of(isLobby ? '/$_lobby' : '/$_board');
-    nsp.on('connection', (server) {
+    await _server?.close();
+    _server = Server();
+    final nsp = _server?.of(isLobby ? '/$_lobby' : '/$_board');
+    nsp?.on('connection', (server) {
       if (server is! Socket) return;
       if (isLobby) server.emit(_serverList, _usersListMessage);
       server.on(_serverMessage, (data) {
@@ -165,15 +166,15 @@ class CommandsDataSourceImpl implements CommandsDataSource {
         server.emit(_playHand, data);
       });
     });
-    await server.listen(isLobby ? Utils.lobbyPort : Utils.boardPort);
+    await _server?.listen(isLobby ? Utils.lobbyPort : Utils.boardPort);
   }
 
   @override
   Future<void> closeServer(User user, bool isLobby) async {
     _sendClientMessage(isLobby, _serverDC);
     await Future.delayed(const Duration(milliseconds: 500));
-    final nsp = server.of(isLobby ? '/$_lobby' : '/$_board');
-    await nsp.server.close();
+    await _server?.close();
+    _server = null;
   }
 
   @override
@@ -271,7 +272,7 @@ class CommandsDataSourceImpl implements CommandsDataSource {
             .add(body.map((e) => NetworkDeviceModel.fromJson(e)).toList());
       },
     );
-    _sendClientMessage(_serverList, _serverList);
+    _sendClientMessage(null, _serverList);
     return controller.stream;
   }
 

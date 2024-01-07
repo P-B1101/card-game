@@ -1,3 +1,4 @@
+import 'package:card_game/core/utils/assets.dart';
 import 'package:flutter/material.dart';
 
 import '../../feature/language/manager/localizatios.dart';
@@ -6,7 +7,21 @@ enum CardType {
   spades,
   hearts,
   diamonds,
-  clubs,
+  clubs;
+
+  String get value => switch (this) {
+        CardType.spades => '♠',
+        CardType.hearts => '♥',
+        CardType.diamonds => '♦',
+        CardType.clubs => '♣',
+      };
+
+  Color get color => switch (this) {
+        CardType.spades => MColors.jet,
+        CardType.hearts => MColors.scarlet,
+        CardType.diamonds => MColors.scarlet,
+        CardType.clubs => MColors.jet,
+      };
 }
 
 enum CardName {
@@ -22,7 +37,23 @@ enum CardName {
   ten,
   jack,
   queen,
-  king,
+  king;
+
+  String get value => switch (this) {
+        CardName.ace => 'A',
+        CardName.two => '2',
+        CardName.three => '3',
+        CardName.four => '4',
+        CardName.five => '5',
+        CardName.six => '6',
+        CardName.seven => '7',
+        CardName.eight => '8',
+        CardName.nine => '9',
+        CardName.ten => '10',
+        CardName.jack => 'J',
+        CardName.queen => 'Q',
+        CardName.king => 'K',
+      };
 }
 
 enum MenuItem {
@@ -67,4 +98,13 @@ enum ServerMessageType {
 enum GameCommands {
   shuffle,
   playHand,
+}
+
+enum GameStep {
+  loading,
+  shuffeling,
+  p1,
+  p2,
+  p3,
+  p4,
 }

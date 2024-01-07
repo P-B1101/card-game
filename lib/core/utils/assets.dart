@@ -26,4 +26,10 @@ class MColors {
   static const grayColor = Color(0xFF808080);
   static const bole = Color(0xFF764134);
   static const ecru = Color(0xFFAFA060);
+  static const faluRed = Color(0XFF721817);
+  static const rustyRed = Color(0xFFDE3C4B);
+  static const scarlet = Color(0xFFF42B03);
+  static const jet = Color(0xFF433A3F);
+
+  
 }

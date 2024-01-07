@@ -8,6 +8,7 @@ import '../../../../core/utils/assets.dart';
 import '../../../../core/utils/enum.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../cards/presentation/widget/card_widget.dart';
 import '../../../language/manager/localizatios.dart';
 import '../../../router/app_router.gr.dart';
 import '../widget/menu/menu_item_widget.dart';
@@ -54,6 +55,7 @@ class __MenuPageState extends State<_MenuPage> {
                 color: MColors.whiteColor,
               ),
             ),
+            CardWidget.front(type: CardType.spades, name: CardName.ten),
             const SizedBox(height: 32),
             Flexible(
               child: ListView.builder(

@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:card_game/core/components/container/toolbar_widget.dart';
 import 'package:card_game/feature/commands/presentation/bloc/players_bloc.dart';
+import 'package:card_game/feature/user/domain/entity/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -58,8 +59,8 @@ class _LobbyPage extends StatefulWidget {
 }
 
 class __LobbyPageState extends State<_LobbyPage> {
-  late final _createServerBloc = context.read<CreateServerBloc>();
-  late final _userCubit = context.read<UsernameCubit>();
+  late CreateServerBloc _createServerBloc = context.read<CreateServerBloc>();
+  late User _user;
 
   @override
   void initState() {
@@ -68,8 +69,15 @@ class __LobbyPageState extends State<_LobbyPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    _user = context.read<UsernameCubit>().state.user;
+    _createServerBloc = context.read<CreateServerBloc>();
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
-    _createServerBloc.add(DisconnectServerEvent.lobby(_userCubit.state.user));
+    _createServerBloc.add(DisconnectServerEvent.lobby(_user));
     super.dispose();
   }
 
@@ -84,6 +92,8 @@ class __LobbyPageState extends State<_LobbyPage> {
           listener: (context, state) => _handleConnectToServerState(state),
         ),
         BlocListener<StartGameCubit, StartGameState>(
+          listenWhen: (previuos, current) =>
+              previuos.countDown != current.countDown,
           listener: (context, state) =>
               _createServerBloc.add(AddMessageEvent.countDown(state.countDown)),
         ),
@@ -105,7 +115,7 @@ class __LobbyPageState extends State<_LobbyPage> {
         .read<ToolbarCubit>()
         .setCallback(() => context.navigateTo(const MenuRoute()));
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final state = _userCubit.state;
+      final state = context.read<UsernameCubit>().state;
       if (state.hasUser) {
         if (_isServer) {
           _createServerBloc.add(DoCreateServerEvent.lobby(state.user));
@@ -119,7 +129,7 @@ class __LobbyPageState extends State<_LobbyPage> {
   }
 
   void _joinToServer() {
-    final state = _userCubit.state;
+    final state = context.read<UsernameCubit>().state;
     if (state.hasUser) {
       context.read<ConnectToServerBloc>().add(DoConnectToServerEvent.lobby(
             user: state.user,
@@ -138,7 +148,7 @@ class __LobbyPageState extends State<_LobbyPage> {
       context.pushRoute(const MenuRoute());
       return;
     }
-    final user = await _userCubit.saveUser(username);
+    final user = await context.read<UsernameCubit>().saveUser(username);
     if (!mounted) return;
     if (_isServer) {
       _createServerBloc.add(DoCreateServerEvent.lobby(user));

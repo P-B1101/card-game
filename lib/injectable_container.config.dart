@@ -8,7 +8,9 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:card_game/core/manager/network_manager.dart' as _i4;
+import 'package:card_game/core/manager/network_manager.dart' as _i5;
+import 'package:card_game/feature/board/presentation/cubit/game_controller_cubit.dart'
+    as _i4;
 import 'package:card_game/feature/commands/data/data_source/commands_data_source.dart'
     as _i17;
 import 'package:card_game/feature/commands/data/repository/commands_repository_impl.dart'
@@ -67,7 +69,6 @@ import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart' as _i2;
 import 'package:sembast/sembast.dart' as _i8;
 import 'package:shared_preferences/shared_preferences.dart' as _i6;
-import 'package:socket_io/socket_io.dart' as _i5;
 
 extension GetItInjectableX on _i1.GetIt {
 // initializes the registration of main-scope dependencies inside of GetIt
@@ -81,12 +82,11 @@ extension GetItInjectableX on _i1.GetIt {
       environmentFilter,
     );
     final registerFToast = _$RegisterFToast();
-    final registerServer = _$RegisterServer();
     final registerSharedPref = _$RegisterSharedPref();
     final registerStoreRef = _$RegisterStoreRef();
     gh.lazySingleton<_i3.FToast>(() => registerFToast.tosat);
-    gh.lazySingleton<_i4.NetworkManager>(() => _i4.NetworkManagerImpl());
-    gh.lazySingleton<_i5.Server>(() => registerServer.server);
+    gh.factory<_i4.GameControllerCubit>(() => _i4.GameControllerCubit());
+    gh.lazySingleton<_i5.NetworkManager>(() => _i5.NetworkManagerImpl());
     await gh.lazySingletonAsync<_i6.SharedPreferences>(
       () => registerSharedPref.prefs,
       preResolve: true,
@@ -98,7 +98,7 @@ extension GetItInjectableX on _i1.GetIt {
         sharedPreferences: gh<_i6.SharedPreferences>()));
     gh.lazySingleton<_i10.DatabaseRepository>(() => _i11.DatabaseRepositoryImpl(
           dataSource: gh<_i9.DataBaseDataSource>(),
-          networkManager: gh<_i4.NetworkManager>(),
+          networkManager: gh<_i5.NetworkManager>(),
         ));
     gh.lazySingleton<_i12.GetUsername>(
         () => _i12.GetUsername(repository: gh<_i10.DatabaseRepository>()));
@@ -110,18 +110,17 @@ extension GetItInjectableX on _i1.GetIt {
         store: gh<_i8.StoreRef<Object?, Object?>>()));
     gh.factory<_i16.UsernameCubit>(() => _i16.UsernameCubit(
           gh<_i14.SaveUsername>(),
-          gh<_i4.NetworkManager>(),
+          gh<_i5.NetworkManager>(),
           gh<_i12.GetUsername>(),
         ));
     gh.lazySingleton<_i17.CommandsDataSource>(() => _i17.CommandsDataSourceImpl(
-          server: gh<_i5.Server>(),
-          networkManager: gh<_i4.NetworkManager>(),
+          networkManager: gh<_i5.NetworkManager>(),
           sembastDataSource: gh<_i15.SembastDataSource>(),
         ));
     gh.lazySingleton<_i18.CommandsRepository>(() => _i19.CommandsRepositoryImpl(
           dataSource: gh<_i17.CommandsDataSource>(),
           repositoryHelper: gh<_i13.RepositoryHelper>(),
-          networkManager: gh<_i4.NetworkManager>(),
+          networkManager: gh<_i5.NetworkManager>(),
         ));
     gh.lazySingleton<_i20.ConnectToServer>(
         () => _i20.ConnectToServer(repository: gh<_i18.CommandsRepository>()));
@@ -164,8 +163,6 @@ extension GetItInjectableX on _i1.GetIt {
 }
 
 class _$RegisterFToast extends _i34.RegisterFToast {}
-
-class _$RegisterServer extends _i34.RegisterServer {}
 
 class _$RegisterSharedPref extends _i34.RegisterSharedPref {}
 

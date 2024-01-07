@@ -16,4 +16,7 @@ class StartGameCubit extends Cubit<StartGameState> {
     emit(state.count());
     return startCountDown();
   }
+
+  void updateIsPlayer(bool isPlayer) =>
+      emit(state.copyWith(isPlayer: isPlayer));
 }

@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/components/container/toolbar_widget.dart';
+import '../../../../core/components/loading/board_loading_widget.dart';
 import '../../../../core/utils/assets.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../../injectable_container.dart';
 import '../../../commands/domain/entity/network_device.dart';
 import '../../../commands/presentation/bloc/connect_to_server_bloc.dart';
 import '../../../commands/presentation/bloc/create_server_bloc.dart';
+import '../../../commands/presentation/bloc/players_bloc.dart';
 import '../../../database/presentation/cubit/username_cubit.dart';
 import '../../../dialog/manager/dialog_manager.dart';
+import '../../../language/manager/localizatios.dart';
 import '../../../router/app_router.gr.dart';
+import '../../../user/domain/entity/user.dart';
+import '../cubit/game_controller_cubit.dart';
+import '../widget/player_table_widget.dart';
 
 @RoutePage()
 class BoardPage extends StatelessWidget {
@@ -31,6 +38,12 @@ class BoardPage extends StatelessWidget {
         BlocProvider<ConnectToServerBloc>(
           create: (context) => getIt<ConnectToServerBloc>(),
         ),
+        BlocProvider<PlayersBloc>(
+          create: (context) => getIt<PlayersBloc>(),
+        ),
+        BlocProvider<GameControllerCubit>(
+          create: (context) => getIt<GameControllerCubit>(),
+        ),
       ],
       child: _BoardPage(device: device),
     );
@@ -48,8 +61,8 @@ class _BoardPage extends StatefulWidget {
 }
 
 class __BoardPageState extends State<_BoardPage> {
-  late final _createServerBloc = context.read<CreateServerBloc>();
-  late final _userCubit = context.read<UsernameCubit>();
+  late CreateServerBloc _createServerBloc = context.read<CreateServerBloc>();
+  late User _user = context.read<UsernameCubit>().state.user;
   @override
   void initState() {
     super.initState();
@@ -57,8 +70,15 @@ class __BoardPageState extends State<_BoardPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    _user = context.read<UsernameCubit>().state.user;
+    _createServerBloc = context.read<CreateServerBloc>();
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
-    _createServerBloc.add(DisconnectServerEvent.board(_userCubit.state.user));
+    _createServerBloc.add(DisconnectServerEvent.board(_user));
     super.dispose();
   }
 
@@ -75,23 +95,115 @@ class __BoardPageState extends State<_BoardPage> {
       ],
       child: Scaffold(
         backgroundColor: MColors.secondaryColor,
-        body: Center(
-          child: Text(
-            'Game board',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: MColors.whiteColor,
-                ),
+        body: BlocBuilder<GameControllerCubit, GameControllerState>(
+          builder: (context, state) => AnimatedSwitcher(
+            duration: UiUtils.duration,
+            switchInCurve: Curves.easeIn,
+            switchOutCurve: Curves.easeOut,
+            child: state.isLoading
+                ? Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          Strings.of(context).board_loading,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: Fonts.bold700,
+                            color: MColors.whiteColor,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const BoardLoadingWidget(),
+                      ],
+                    ),
+                  )
+                : Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: BlocBuilder<PlayersBloc, PlayersState>(
+                          builder: (context, pState) =>
+                              BlocBuilder<UsernameCubit, UsernameState>(
+                            builder: (context, state) {
+                              final players = pState.items.where(
+                                  (element) => element.ip != state.user.ip);
+                              return RotatedBox(
+                                quarterTurns: 2,
+                                child: PlayerTableWidget(
+                                  player: players.firstOrNull,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: BlocBuilder<PlayersBloc, PlayersState>(
+                          builder: (context, pState) =>
+                              BlocBuilder<UsernameCubit, UsernameState>(
+                            builder: (context, state) {
+                              final players = pState.items.where(
+                                  (element) => element.ip != state.user.ip);
+                              return RotatedBox(
+                                quarterTurns: 1,
+                                child: PlayerTableWidget(
+                                  player: players.elementAtOrNull(1),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: BlocBuilder<PlayersBloc, PlayersState>(
+                          builder: (context, pState) =>
+                              BlocBuilder<UsernameCubit, UsernameState>(
+                            builder: (context, state) {
+                              final players = pState.items.where(
+                                  (element) => element.ip != state.user.ip);
+                              return RotatedBox(
+                                quarterTurns: 3,
+                                child: PlayerTableWidget(
+                                  player: players.elementAtOrNull(2),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: BlocBuilder<PlayersBloc, PlayersState>(
+                          builder: (context, pState) =>
+                              BlocBuilder<UsernameCubit, UsernameState>(
+                            builder: (context, state) {
+                              final me = pState.items
+                                  .where(
+                                      (element) => element.ip == state.user.ip)
+                                  .firstOrNull;
+                              return PlayerTableWidget(player: me);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),
     );
   }
 
-  void _handleInitState() {
+  void _handleInitState() async {
     context
         .read<ToolbarCubit>()
         .setCallback(() => context.navigateTo(const MenuRoute()));
     final state = context.read<UsernameCubit>().state;
+    await Future.delayed(const Duration(milliseconds: 2000));
+    if (!mounted) return;
     if (_isServer) {
       _createServerBloc.add(DoCreateServerEvent.board(state.user));
     } else {
@@ -122,13 +234,11 @@ class __BoardPageState extends State<_BoardPage> {
     context.navigateTo(const MenuRoute());
   }
 
-  void _handleConnectToServerState(ConnectToServerState state) {
+  void _handleConnectToServerState(ConnectToServerState state) async {
     if (state is ConnectToServerSuccess && state.item != null) {
-      // if (state.item?.isStartGame ?? false) {
-      //   _handleStartGame();
-      // }
-      //_createServerBloc.add(AddMessageEvent(message: state.item!));
-      // context.read<PlayersBloc>().add(GetPlayersEvent());
+      context.read<PlayersBloc>().add(GetPlayersEvent());
+      if (mounted) context.read<GameControllerCubit>().loadingDone();
+      return;
     }
     if (state is DisconnectFromServerState) {
       if (!state.isLobby) showServerDisconnectedDialog();

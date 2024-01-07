@@ -9,7 +9,7 @@ class Utils {
     exit(0);
   }
 
-  static const maxCountDown = 5;
+  static const maxCountDown = 1;
   
   static const lobbyPort = 1212;
 

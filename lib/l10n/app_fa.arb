@@ -22,5 +22,6 @@
     "start_label": "شروع بازی",
     "ready_label": "آماده ام",
     "im_server_label": "سرور منم :)",
-    "game_start_in_place_holder": "بازی تا $0 ثانیه دیگر شروع می شود"
+    "game_start_in_place_holder": "بازی تا $0 ثانیه دیگر شروع می شود",
+    "board_loading": "آماده سازی صفحه بازی"
 }

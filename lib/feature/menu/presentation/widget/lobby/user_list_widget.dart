@@ -56,6 +56,7 @@ class UserListWidget extends StatelessWidget {
                     color: MColors.keppel,
                     enableClickWhenDisable: false,
                     onClick: () {
+                      context.read<StartGameCubit>().updateIsPlayer(true);
                       if (isServer) {
                         context
                             .read<ConnectToServerBloc>()
