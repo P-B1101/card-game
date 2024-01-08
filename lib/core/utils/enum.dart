@@ -22,6 +22,13 @@ enum CardType {
         CardType.diamonds => MColors.scarlet,
         CardType.clubs => MColors.jet,
       };
+
+  String get svg => switch (this) {
+        CardType.spades => 's.svg',
+        CardType.hearts => 'h.svg',
+        CardType.diamonds => 'd.svg',
+        CardType.clubs => 'c.svg',
+      };
 }
 
 enum CardName {
@@ -103,6 +110,7 @@ enum GameCommands {
 enum GameStep {
   loading,
   shuffeling,
+  started,
   p1,
   p2,
   p3,

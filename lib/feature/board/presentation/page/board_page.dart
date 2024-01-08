@@ -18,6 +18,7 @@ import '../../../router/app_router.gr.dart';
 import '../../../user/domain/entity/user.dart';
 import '../cubit/game_controller_cubit.dart';
 import '../widget/player_table_widget.dart';
+import '../widget/shuffel_widget.dart';
 
 @RoutePage()
 class BoardPage extends StatelessWidget {
@@ -189,6 +190,7 @@ class __BoardPageState extends State<_BoardPage> {
                           ),
                         ),
                       ),
+                      const Center(child: ShuffelWidget()),
                     ],
                   ),
           ),

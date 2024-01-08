@@ -31,4 +31,10 @@ class MCard extends Equatable {
         CardName.queen => 11,
         CardName.king => 12,
       };
+
+  factory MCard.init({
+    required CardName name,
+    required CardType type,
+  }) =>
+      MCard(name: name, owner: null, type: type);
 }

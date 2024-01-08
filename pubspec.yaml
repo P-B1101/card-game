@@ -47,6 +47,7 @@ dependencies:
   connectivity_plus: ^5.0.2
   bitsdojo_window: ^0.1.6
   sembast: ^3.5.0+1
+  flutter_svg: ^2.0.9
 
 
 
@@ -69,6 +70,9 @@ flutter:
   assets:
     - assets/images/png/
     - assets/images/svg/
+    - assets/images/svg/j/
+    - assets/images/svg/k/
+    - assets/images/svg/q/
 
 
   fonts:

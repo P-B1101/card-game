@@ -1,14 +1,13 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:card_game/core/components/container/toolbar_widget.dart';
-import 'package:card_game/feature/database/presentation/cubit/username_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/components/container/toolbar_widget.dart';
 import '../../../../core/utils/assets.dart';
 import '../../../../core/utils/enum.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../core/utils/utils.dart';
-import '../../../cards/presentation/widget/card_widget.dart';
+import '../../../database/presentation/cubit/username_cubit.dart';
 import '../../../language/manager/localizatios.dart';
 import '../../../router/app_router.gr.dart';
 import '../widget/menu/menu_item_widget.dart';
@@ -55,7 +54,6 @@ class __MenuPageState extends State<_MenuPage> {
                 color: MColors.whiteColor,
               ),
             ),
-            CardWidget.front(type: CardType.spades, name: CardName.ten),
             const SizedBox(height: 32),
             Flexible(
               child: ListView.builder(
