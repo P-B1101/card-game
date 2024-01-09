@@ -29,7 +29,7 @@ class UsernameCubit extends Cubit<UsernameState> {
   Future<User> saveUser(String username) async {
     _saveUsername(username);
     final ip = await _networkManager.getMyIp();
-    final user = User(username: username, ip: ip);
+    final user = User(username: username, ip: ip, isRuler: false);
     emit(UsernameState(user: user, hasUser: true));
     return user;
   }

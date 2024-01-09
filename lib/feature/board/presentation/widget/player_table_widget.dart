@@ -1,7 +1,10 @@
-import 'package:card_game/core/utils/assets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/assets.dart';
 import '../../../commands/domain/entity/network_device.dart';
+import '../cubit/game_controller_cubit.dart';
+import 'player_cards_widget.dart';
 
 class PlayerTableWidget extends StatelessWidget {
   final NetworkDevice? player;
@@ -34,6 +37,17 @@ class PlayerTableWidget extends StatelessWidget {
                   fontSize: 14,
                   fontWeight: Fonts.medium600,
                   color: MColors.whiteColor,
+                ),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: BlocBuilder<GameControllerCubit, GameControllerState>(
+              builder: (context, state) => Transform.scale(
+                scale: .8,
+                child: PlayerCardsWidget(
+                  items: state.getCards(player),
                 ),
               ),
             ),

@@ -110,7 +110,11 @@ enum GameCommands {
 enum GameStep {
   loading,
   shuffeling,
-  started,
+  shuffelingDone,
+  dealingP1,
+  dealingP2,
+  dealingP3,
+  dealingP4,
   p1,
   p2,
   p3,

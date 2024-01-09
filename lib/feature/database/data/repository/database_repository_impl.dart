@@ -27,6 +27,7 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
       return User(
         username: dataSource.getUsername(),
         ip: ip,
+        isRuler: false,
       );
     } catch (error) {
       debugPrint(error.toString());

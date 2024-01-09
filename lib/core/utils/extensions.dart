@@ -143,3 +143,24 @@ extension MapStringDynamicExt on Map<String, dynamic> {
     return value.map((e) => converter(e)).toList();
   }
 }
+
+extension ListTExt<T> on List<T> {
+  List<T> get getLastFour {
+    if (length < 4) {
+      final items = sublist(0);
+      clear();
+      return items;
+    }
+    final items = sublist(length - 4);
+    removeRange(length - 4, length);
+    return items;
+  }
+}
+
+extension UserCardsRecordExt on ({User user, List<MCard> cards}) {
+  ({User user, List<MCard> cards}) copyWith({
+    User? user,
+    List<MCard>? cards,
+  }) =>
+      (user: user ?? this.user, cards: cards ?? this.cards);
+}

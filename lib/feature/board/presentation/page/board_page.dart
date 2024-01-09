@@ -18,7 +18,7 @@ import '../../../router/app_router.gr.dart';
 import '../../../user/domain/entity/user.dart';
 import '../cubit/game_controller_cubit.dart';
 import '../widget/player_table_widget.dart';
-import '../widget/shuffel_widget.dart';
+import '../widget/shuffeled_cards_widget.dart';
 
 @RoutePage()
 class BoardPage extends StatelessWidget {
@@ -92,6 +92,12 @@ class __BoardPageState extends State<_BoardPage> {
         ),
         BlocListener<ConnectToServerBloc, ConnectToServerState>(
           listener: (context, state) => _handleConnectToServerState(state),
+        ),
+        BlocListener<PlayersBloc, PlayersState>(
+          listener: (context, state) => _handlePlayersState(state),
+        ),
+        BlocListener<GameControllerCubit, GameControllerState>(
+          listener: (context, state) => _handleGameControllerState(state),
         ),
       ],
       child: Scaffold(
@@ -190,7 +196,7 @@ class __BoardPageState extends State<_BoardPage> {
                           ),
                         ),
                       ),
-                      const Center(child: ShuffelWidget()),
+                      const Center(child: ShuffeledCardsWidget()),
                     ],
                   ),
           ),
@@ -244,6 +250,19 @@ class __BoardPageState extends State<_BoardPage> {
     }
     if (state is DisconnectFromServerState) {
       if (!state.isLobby) showServerDisconnectedDialog();
+    }
+  }
+
+  void _handlePlayersState(PlayersState state) async {
+    if (state is AddPlayerState) {
+      context.read<GameControllerCubit>().initPlayers(state.items);
+      return;
+    }
+  }
+
+  void _handleGameControllerState(GameControllerState state) {
+    if (state.isShuffeling) {
+      context.read<GameControllerCubit>().dealingP1();
     }
   }
 

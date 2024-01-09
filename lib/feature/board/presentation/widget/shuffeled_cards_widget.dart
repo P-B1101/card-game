@@ -7,8 +7,8 @@ import '../../../../core/utils/utils.dart';
 import '../../../cards/presentation/widget/card_widget.dart';
 import '../cubit/game_controller_cubit.dart';
 
-class ShuffelWidget extends StatelessWidget {
-  const ShuffelWidget({
+class ShuffeledCardsWidget extends StatelessWidget {
+  const ShuffeledCardsWidget({
     super.key,
   });
 
@@ -39,7 +39,7 @@ class ShuffelWidget extends StatelessWidget {
                         state.cards[index],
                       ),
                     ),
-                    secondChild: const SizedBox(width: 120),
+                    secondChild: const SizedBox(),
                   ),
                 ),
               ),
